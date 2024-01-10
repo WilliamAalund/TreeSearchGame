@@ -1,0 +1,6 @@
+NUMBER,SERIAL,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,PRIORITY,EFFECT,EFFECT_CHANCE,CONTACT,TARGET,BASE_PP,DESCRIPTION
+1,11,Tackle,Normal,Physical,40,100,0,None,0,Y,S,35,
+2,21,Swift,Normal,Special,60,101,0,None,0,N,D,20,
+3,31,Growl,Normal,Effect,0,100,0,Lower_Attack,101,N,D,40,
+4,41,Hyper Beam,Normal,Special,150,90,0,Recharge,101,N,S,5,
+5,51,Flamethrower,Fire,Special,90,100,0,Burn,10,N,S,15,
