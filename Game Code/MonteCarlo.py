@@ -1,28 +1,33 @@
 from math import *
-from random import *
-from GameClasses import GameState # Dependency for Node class
+#from random import *
+import random as rng
+from MatchClasses import GameState # Dependency for Node class
 
 # --- GLOBAL VARIABLES ---
-exploration_parameter = 1 # Exploration parameter for UCB formula. Higher value means more exploration. 
-ai_intelligence = 200 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
-
-#game_number = 1 # Not game agnostic. Used in mock up game, not used anymore
-
+exploration_parameter = 1.4 # Exploration parameter for UCB formula. Higher value means more exploration. 
+ai_intelligence = 250 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
+search_depth = 45 # Depth of the search tree. Higher value means more accurate results, but more time taken.
 
 # --- MONTE CARLO TREE SEARCH CLASS ---
 class MonteCarloTreeSearch:
-    def __init__(self, game_state):
+    def __init__(self, game_state, verbose = False, random_policy = True):
         self.root = Node(game_state)
+        self.verbose = verbose
+        self.random_policy = random_policy
     
     def get_best_move(self):
         i = 0
         while i < ai_intelligence:
+            #if i % 20 == 0:
+            #    print(".", end="")
             leaf = self.traverse_tree(self.root) # Selection. leaf equals a node that does not have children, and conforms to the rollout policy. (Rollout policy detailed in node class)
             result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Returns result of game.
+            if self.verbose:
+                print("Result of rollout: " + str(result))
             self.backpropagate_tree(leaf, result) # Backpropagation. Updates the stats of the nodes from the leaf to the root.
             i += 1
-        #self.root.print_children()
-        #print("Best move is: " + str(self.root.best_child().state.last_move) + " with a ucb value of: " + str(self.root.best_child().ucb))
+        if self.verbose:
+            print("Best move is: " + str(self.root.best_child().state.last_move) + " with a ucb value of: " + str(self.root.best_child().ucb))
         return self.root.best_child().state.last_move
     
     def traverse_tree(self, node): # Modified traversal function. Evenly spreads traversals between nodes with high ucb values and nodes with low visits. Game agnostic.
@@ -30,12 +35,12 @@ class MonteCarloTreeSearch:
             node = node.best_child()
         # if no children, or if node is terminal
         if not node.node_is_terminal():
-            return node.rollout_policy()
+            return node.rollout_policy(random_policy=self.random_policy)
         return node
 
     def rollout(self, node):
         while not node.node_is_terminal():
-            node = node.rollout_policy()
+            node = node.rollout_policy(random_policy=self.random_policy)
         if node.is_game_won():
             return 1
         else:
@@ -67,7 +72,7 @@ class Node: # Class designed in a game state agnostic way
         return self.parent is None
     
     def node_is_terminal(self):
-        return self.is_terminal
+        return self.is_terminal or self.state.turn_count > search_depth
 
     def is_game_won(self):
         return self.state.did_ai_win()
@@ -82,8 +87,6 @@ class Node: # Class designed in a game state agnostic way
         return self.state.calculate_policy_rating()
 
     def expand(self): # Expands the node by creating children. Children represent all possible moves from the current state. Partially game agnostic, generates choices depending on the possible actions you could take in game state.
-        #if len(self.state.get_ai_possible_actions()) == 0:
-        #    print("Error: No possible actions")
         if self.node_is_terminal():
             print("I am a terminal node that is being expanded")
         for state in self.state.get_ai_possible_actions():
@@ -99,9 +102,9 @@ class Node: # Class designed in a game state agnostic way
         else:
             return
         if random_policy:
-            return choice(self.children) if self.children else None
-        else: # Not working properly
-            return min(self.children, key=lambda child: (child.get_policy_rating(), child.visits))
+            return rng.choice(self.children) if self.children else None
+        else: 
+            return max(self.children, key=lambda child: (child.get_policy_rating(), child.ucb))
 
     def best_child(self):
         return max(self.children, key=lambda child: child.ucb)
@@ -127,7 +130,6 @@ class Node: # Class designed in a game state agnostic way
         parent_visits = 0
         if self.parent:
             parent_visits = self.node_get_parent_visits()
-        #print(str(self.wins) + " " + str(self.visits) + " " + str(parent_visits))
         self.ucb = self.wins / self.visits
         if parent_visits > 0:
             self.ucb += exploration_parameter * sqrt(log(parent_visits) / self.visits)
@@ -135,12 +137,3 @@ class Node: # Class designed in a game state agnostic way
     def print_children(self):
         for child in self.children:
             print("Child: " + str(child.state.state_value) + " with ucb value of: " + str(child.ucb) + " and visits of: " + str(child.visits))
-
-# Not functioning
-def get_current_game_state(): # Non game agnostic function, encapsulates the game state and returns it. To be used in the monte carlo tree search class
-    state_object = GameState()
-    return state_object
-
-#my_tree_search = MonteCarloTreeSearch(get_current_game_state())
-#best_move = my_tree_search.get_best_move()
-#print(best_move)

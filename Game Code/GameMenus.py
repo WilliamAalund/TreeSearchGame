@@ -4,7 +4,7 @@ force_game_in_terminal = True # Will force the game to run in terminal even if o
 def get_platform():
     global game_on_calculator
     try:
-        import ti_system
+        import ti_system # This will produce a warning if not running on a TI calculator
         print("Running on TI calculator")
         game_on_calculator = True
     except:
@@ -76,7 +76,44 @@ def generic_input(input_message = "Enter input { ", action_1 = "continue", actio
             return 6
 
 
-def battle_menu_input(active_member_moves, team_members):
+def switch_menu(input_message = "Choose a Pokemon.", team_members=[], valid_switch_indices=[], Back = True):
+    uinp = -1
+    if Back:
+        able_to_back = "Back"
+    else:
+        able_to_back = ""
+    if using_calculator_menus():
+        return input()
+    else: # Case where not on calculator, or force_game_in_terminal is True
+        in_menu = True
+        while in_menu:
+            switch_input = -1
+            input_message = input_message
+            if len(valid_switch_indices) == 6:
+                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], team_members[4], team_members[5], able_to_back)
+            elif len(valid_switch_indices) == 5:
+                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], team_members[4], able_to_back)
+            elif len(valid_switch_indices) == 4:
+                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], able_to_back)
+            elif len(valid_switch_indices) == 3:
+                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], able_to_back)
+            elif len(valid_switch_indices) == 2:
+                switch_input = generic_input(input_message, team_members[0], team_members[1], able_to_back)
+            elif len(valid_switch_indices) == 1:
+                switch_input = generic_input(input_message, team_members[0], able_to_back)
+            else:
+                print("You have no other Pokemon to switch to.")
+                in_menu = False
+            if Back: # Back indicates that function is being used in a larger menu
+                in_menu = False
+            else:
+                if switch_input in range(len(valid_switch_indices)):
+                    uinp = valid_switch_indices[int(uinp)] + 4
+                    in_menu = False
+                    return uinp
+        return switch_input
+
+def battle_menu_input(active_member_moves, team_members, valid_switch_indices = []):
     if using_calculator_menus():
         return input()
     else: # Case where not on calculator, or force_game_in_terminal is True
@@ -86,7 +123,7 @@ def battle_menu_input(active_member_moves, team_members):
             minp = generic_input("What will you do?", "Attack", "Pokemon", "Run")
             if minp == 0: # Attack
                 attack_input = -1
-                input_message = "Choose a move."
+                input_message = "Choose a move." # FIXME: Implement a way to show PP
                 if len(active_member_moves) == 4:
                     attack_input = generic_input(input_message, active_member_moves[0], active_member_moves[1], active_member_moves[2], active_member_moves[3], "Back")
                 elif len(active_member_moves) == 3:
@@ -101,29 +138,18 @@ def battle_menu_input(active_member_moves, team_members):
                     uinp = int(attack_input)
                     in_menu = False
             elif minp == 1: # Pokemon
-                switch_input = -1
                 input_message = "Choose a Pokemon."
-                if len(team_members) == 6:
-                    switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], team_members[4], team_members[5], "Back")
-                elif len(team_members) == 5:
-                    switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], team_members[4], "Back")
-                elif len(team_members) == 4:
-                    switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], "Back")
-                elif len(team_members) == 3:
-                    switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], "Back")
-                elif len(team_members) == 2:
-                    switch_input = generic_input(input_message, team_members[0], team_members[1], "Back")
-                elif len(team_members) == 1:
-                    switch_input = generic_input(input_message, team_members[0], "Back")
-                else:
-                    print("You have no other Pokemon to switch to.")
-                if switch_input in range(len(team_members)):
-                    uinp = int(switch_input) + 4
+                switch_input = switch_menu(input_message, team_members, valid_switch_indices, True)
+                if switch_input in range(len(valid_switch_indices)):
+                    uinp = valid_switch_indices[int(uinp)] + 4
                     in_menu = False
                 # List team, then list options about team
             elif minp == 2: # Run
                 uinp = 10
                 in_menu = False
+        print()
         return uinp
 
-#battle_menu_input(["Tackle", "Growl", "Tail Whip", "Scratch"], ["Bulbasaur", "Charmander", "Squirtle"])
+
+#switch_menu("yyyy",["Charmander", "Squirtle", "Bulbasaur"], [0, 1, 2])
+#battle_menu_input(["Tackle", "Scratch", "Growl", "Tail Whip"], ["Charmander", "Squirtle", "Bulbasaur"], [0, 1, 2])

@@ -1,6 +1,6 @@
 from MonteCarlo import MonteCarloTreeSearch
 from GameMenus import *
-from GameClasses import *   
+from MatchClasses import *   
 
 def main():
     print("Program start")
