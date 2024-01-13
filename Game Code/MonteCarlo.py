@@ -4,9 +4,9 @@ import random as rng
 from MatchClasses import GameState # Dependency for Node class
 
 # --- GLOBAL VARIABLES ---
-exploration_parameter = 1.4 # Exploration parameter for UCB formula. Higher value means more exploration. 
-ai_intelligence = 250 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
-search_depth = 45 # Depth of the search tree. Higher value means more accurate results, but more time taken.
+exploration_parameter = 0.7 # Exploration parameter for UCB formula. Higher value means more exploration. 
+ai_intelligence = 800 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
+search_depth = 50 # Depth of the search tree. Higher value means more accurate results, but more time taken.
 
 # --- MONTE CARLO TREE SEARCH CLASS ---
 class MonteCarloTreeSearch:
@@ -21,7 +21,7 @@ class MonteCarloTreeSearch:
             #if i % 20 == 0:
             #    print(".", end="")
             leaf = self.traverse_tree(self.root) # Selection. leaf equals a node that does not have children, and conforms to the rollout policy. (Rollout policy detailed in node class)
-            result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Returns result of game.
+            result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Choice of nodes is based on the rollout policy.
             if self.verbose:
                 print("Result of rollout: " + str(result))
             self.backpropagate_tree(leaf, result) # Backpropagation. Updates the stats of the nodes from the leaf to the root.
@@ -41,8 +41,18 @@ class MonteCarloTreeSearch:
     def rollout(self, node):
         while not node.node_is_terminal():
             node = node.rollout_policy(random_policy=self.random_policy)
-        if node.is_game_won():
+        if node.is_game_won(): # Not game agnostic, score returned is based on number of turns taken to win
             return 1
+            '''num_turns = node.state.turn_count
+            if num_turns == 0:
+                return 1
+            if num_turns == 1:
+                return 5
+            if num_turns < 3:
+                return 4
+            if num_turns < 6:
+                return 3
+            return 1 / num_turns'''
         else:
             return 0
 
@@ -63,7 +73,11 @@ class Node: # Class designed in a game state agnostic way
         self.visits = 0
         self.node_expanded = False
         self.parent = parent
-        self.is_terminal = self.state.is_game_over()
+        self.is_terminal = self.state.did_elimination_occur()
+        #self.is_terminal = self.state.is_game_over()
+        #self.is_terminal = self.state.did_ai_get_an_elimination() or self.state.did_player_get_an_elimination() # FIXME: Will encourage AI to use a move like explosion if it is the only way to win. Should be changed to is_game_over() when that is implemented.
+        # TODO: Integrate both forms of MTCS into node: one that simulates the whole game, and one that simulates until an elimination is achieved.
+
 
     def node_is_expanded(self):
         return self.node_expanded
@@ -74,8 +88,9 @@ class Node: # Class designed in a game state agnostic way
     def node_is_terminal(self):
         return self.is_terminal or self.state.turn_count > search_depth
 
-    def is_game_won(self):
-        return self.state.did_ai_win()
+    def is_game_won(self): # TODO: Integrate both forms of MTCS into node: one that simulates the whole game, and one that simulates until an elimination is achieved.
+        #return self.state.did_ai_win()
+        return self.state.did_ai_win_a_matchup()
     
     def node_get_parent(self):
         if self.node_is_root():
@@ -104,6 +119,7 @@ class Node: # Class designed in a game state agnostic way
         if random_policy:
             return rng.choice(self.children) if self.children else None
         else: 
+            #print(self.is_terminal, self.state.did_ai_get_an_elimination(), self.state.turn_count, search_depth)
             return max(self.children, key=lambda child: (child.get_policy_rating(), child.ucb))
 
     def best_child(self):
