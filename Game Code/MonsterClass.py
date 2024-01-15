@@ -17,15 +17,27 @@ SPEED = 4
 HP = 5
 MAX_HP = 6
 
+UNOVA_LOWER_BOUND = 494
+UNOVA_UPPER_BOUND = 649
+
 NATURE_DICT = {'Hardy': (ATTACK, ATTACK), 'Lonely': (ATTACK, DEFENSE), 'Adamant': (ATTACK, SP_ATTACK), 'Naughty': (ATTACK, SP_DEFENSE), 'Brave': (ATTACK, SPEED),
               'Bold': (DEFENSE, ATTACK), 'Docile': (DEFENSE, DEFENSE), 'Impish': (DEFENSE, SP_ATTACK), 'Lax': (ATTACK, SP_DEFENSE), 'Relaxed': (DEFENSE, SPEED),
               'Modest': (SP_ATTACK, ATTACK), 'Mild': (SP_ATTACK, DEFENSE), 'Bashful': (SP_ATTACK, SP_ATTACK), 'Rash': (SP_ATTACK, SP_DEFENSE), 'Quiet': (SP_ATTACK, SPEED),
               'Calm': (SP_DEFENSE, ATTACK), 'Gentle': (SP_DEFENSE, DEFENSE), 'Careful': (SP_DEFENSE, SP_ATTACK), 'Quirky': (SP_DEFENSE, SP_DEFENSE), 'Sassy': (SP_DEFENSE, SPEED),
               'Timid': (SPEED, ATTACK), 'Hasty': (SPEED, DEFENSE), 'Jolly': (SPEED, SP_ATTACK), 'Naive': (SPEED, SP_DEFENSE), 'Serious': (SPEED, SPEED)}
 
-
 class Monster: #TODO: set up move database for each monster
     def __init__(self, number_id=1, level=1, code=1, deep_copy=None) -> None:
+        
+        self.attack_boost = 0
+        self.defense_boost = 0
+        self.special_attack_boost = 0
+        self.special_defense_boost = 0
+        self.speed_boost = 0
+        self.accuracy_boost = 0
+        self.evasion_boost = 0
+        self.crit_chance = 0
+
         if deep_copy:
             self.name = deep_copy.name
             self.not_fainted = deep_copy.not_fainted
@@ -83,6 +95,8 @@ class Monster: #TODO: set up move database for each monster
             self.can_evolve = deep_copy.can_evolve
             self.evolution_method = deep_copy.evolution_method
             self.learn_set = deep_copy.learn_set
+
+
             return
         else:
             # Monster stats
@@ -212,6 +226,55 @@ class Monster: #TODO: set up move database for each monster
         if self.move_4:
             moves.append(self.move_4.name)
         return moves
+
+    def reset_boosts(self):
+        self.attack_boost = 0
+        self.defense_boost = 0
+        self.special_attack_boost = 0
+        self.special_defense_boost = 0
+        self.speed_boost = 0
+        self.accuracy_boost = 0
+        self.evasion_boost = 0
+        self.crit_chance = 0
+
+    def get_multiplier_for_stat(self, stat):
+        if stat == ATTACK:
+            curr_boost = self.attack_boost
+        elif stat == DEFENSE:
+            curr_boost = self.defense_boost
+        elif stat == SP_ATTACK:
+            curr_boost = self.special_attack_boost
+        elif stat == SP_DEFENSE:
+            curr_boost = self.special_defense_boost
+        elif stat == SPEED:
+            curr_boost = self.speed_boost
+        if curr_boost == 1:
+            return 1.5
+        elif curr_boost == 2:
+            return 2
+        elif curr_boost == 3:
+            return 2.5
+        elif curr_boost == 4:
+            return 3
+        elif curr_boost == 5:
+            return 3.5
+        elif curr_boost == 6:
+            return 4
+        elif curr_boost == -1:
+            return 0.66
+        elif curr_boost == -2:
+            return 0.5
+        elif curr_boost == -3:
+            return 0.4
+        elif curr_boost == -4:
+            return 0.33
+        elif curr_boost == -5:
+            return 0.28
+        elif curr_boost == -6:
+            return 0.25
+        else:
+            return 1
+
 
     def get_list_of_valid_move_numbers(self): # Used in getting a list of valid moves to choose from in MatchClasses.py
         moves = []
@@ -390,6 +453,21 @@ class Monster: #TODO: set up move database for each monster
     def deep_copy(self): # Returns a deep copy of the monster, used in Monte Carlo Tree Search
         new_monster = Monster(deep_copy=self)
         return new_monster
+
+def generated_monster(id = 0, level_parameter = 1): #TODO: Implement monster generation
+    if id == -1:
+        monster_id = rng.randint(UNOVA_LOWER_BOUND,UNOVA_UPPER_BOUND)
+    else:
+        monster_id = id
+    if level_parameter > 0 and level_parameter < 101:
+        level = level_parameter
+    else:
+        print("Invalid level parameter, setting to 1")
+        level = 1
+    monster = Monster(monster_id, level)
+    # Create a randomly generated monster
+    # Return the monster
+    return monster
 
 if __name__ == "__main__":
     TestMonster = Monster(495, 50)

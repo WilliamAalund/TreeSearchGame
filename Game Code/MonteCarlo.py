@@ -4,9 +4,9 @@ import random as rng
 from MatchClasses import GameState # Dependency for Node class
 
 # --- GLOBAL VARIABLES ---
-exploration_parameter = 0.7 # Exploration parameter for UCB formula. Higher value means more exploration. 
-ai_intelligence = 800 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
-search_depth = 50 # Depth of the search tree. Higher value means more accurate results, but more time taken.
+exploration_parameter = 1.5 # Exploration parameter for UCB formula. Higher value means more exploration. 
+ai_intelligence = 2500 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
+search_depth = 15 # Depth of the search tree. Higher value means more accurate results, but more time taken.
 
 # --- MONTE CARLO TREE SEARCH CLASS ---
 class MonteCarloTreeSearch:
@@ -18,8 +18,8 @@ class MonteCarloTreeSearch:
     def get_best_move(self):
         i = 0
         while i < ai_intelligence:
-            #if i % 20 == 0:
-            #    print(".", end="")
+            if i % 100 == 0:
+                print(".", end="")
             leaf = self.traverse_tree(self.root) # Selection. leaf equals a node that does not have children, and conforms to the rollout policy. (Rollout policy detailed in node class)
             result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Choice of nodes is based on the rollout policy.
             if self.verbose:
@@ -28,6 +28,7 @@ class MonteCarloTreeSearch:
             i += 1
         if self.verbose:
             print("Best move is: " + str(self.root.best_child().state.last_move) + " with a ucb value of: " + str(self.root.best_child().ucb))
+        print()
         return self.root.best_child().state.last_move
     
     def traverse_tree(self, node): # Modified traversal function. Evenly spreads traversals between nodes with high ucb values and nodes with low visits. Game agnostic.
@@ -42,7 +43,7 @@ class MonteCarloTreeSearch:
         while not node.node_is_terminal():
             node = node.rollout_policy(random_policy=self.random_policy)
         if node.is_game_won(): # Not game agnostic, score returned is based on number of turns taken to win
-            return 1
+            return 1 + node.state.get_outcome_reward()
             '''num_turns = node.state.turn_count
             if num_turns == 0:
                 return 1
@@ -109,7 +110,7 @@ class Node: # Class designed in a game state agnostic way
         self.node_expanded = True
     
     def result(self): # Returns if the AI won or lost on a terminal node. Game agnostic. Called in MonteCarloTreeSearch class
-        return self.state.did_ai_win()
+        return self.state.did_ai_win_a_matchup()
     
     def rollout_policy(self, random_policy = True):
         if not self.node_expanded and not self.node_is_terminal():

@@ -10,7 +10,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 9,Hyper Beam,Normal,Special,150,90,5,101,0,Recharge,0,N,S,The user must recharge after use.,M,,,Alter_Defense
 10,Growl,Normal,Effect,0,100,40,101,0,Alter_Attack,-1,N,D,Lowers opponent's attack.,-,,,Alter_Attack_User
 11,Leer,Normal,Effect,0,100,30,101,0,Alter_Defense,-1,N,S,Lowers opponent's defense.,-,,,Heal_User
-12,Growth,Normal,Effect,0,101,20,101,0,Alter_Attack_User,1,N,U,Raises user's special attack.,M,,,Reset_Status_User
+12,Growth,Normal,Effect,0,101,20,101,0,Alter_Special_Attack_User,1,N,U,Raises user's special attack.,M,,,Reset_Status_User
 13,Swords Dance,Normal,Effect,0,101,20,101,0,Alter_Attack_User,2,N,U,Sharply raises user's attack.,M,,,Burn
 14,Recover,Normal,Effect,0,101,10,101,0,Heal_User,50,N,U,Heals user's HP.,M,,,Burn_Flinch
 15,Refresh,Normal,Effect,0,101,20,101,0,Reset_Status_User,1,N,U,Cures user of status aliments.,M,,,Alter_Special_Attack
@@ -35,7 +35,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 34,Razor Shell,Water,Physical,75,95,10,12.5,0,High_Crit,0,N,S,,-,,,Reset_Stat_Changes
 35,Aqua Jet,Water,Physical,40,100,20,0,1,None,0,Y,S,,R,,,Counter
 36,Rain Dance,Water,Effect,0,101,5,0,0,Set_Rain,0,N,U,Makes the weather rainy.,M,,,Alter_Attack_Defense_User
-37,Withdraw,Water,Effect,0,101,40,101,0,Raise_Defense_User,1,N,U,Raises user's defense.,-,,,Alter_Defense_Special_Defense
+37,Withdraw,Water,Effect,0,101,40,101,0,Alter_Defense_User,1,N,U,Raises user's defense.,-,,,Alter_Defense_Special_Defense
 38,Thundershock,Electric,Special,40,100,30,10,0,Paralyze,1,N,S,Chance to paralyze the target.,-,,,Tighten_Focus
 39,Thunderbolt,Electric,Special,90,100,15,10,0,Paralyze,1,N,S,Chance to paralyze the target.,M,,,Alter_Speed_User
 40,Thunder,Electric,Special,110,70,10,30,0,Paralyze,1,N,S,Chance to paralyze the target.,M,,,Double_Damage_If_Attacked
@@ -155,4 +155,4 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 154,Moonblast,Fairy,Special,95,100,15,30,0,Alter_Special_Attack,-1,N,S,Chance to lower the target's special attack.,M,,,
 155,Play Rough,Fairy,Physical,90,90,10,10,0,Alter_Attack,-1,N,S,Chance to lower the target's attack.,M,,,
 156,Fairy Wind,Fairy,Physical,40,100,30,30,0,None,0,N,S,,-,,,
-157,Struggle,???,Physical,50,101,0,0,0,None,0,N,S,Only usable when all PP are gone. Hurts the user.,-,Move not used in actual struggle damage calc,,
+157,Struggle,Typeless,Physical,50,101,0,0,0,Recoil,0,N,S,Only usable when all PP are gone. Hurts the user.,-,Move not used in actual struggle damage calc,,

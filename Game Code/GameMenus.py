@@ -108,7 +108,7 @@ def switch_menu(input_message = "Choose a Pokemon.", team_members=[], valid_swit
                 in_menu = False
             else:
                 if switch_input in range(len(valid_switch_indices)):
-                    uinp = valid_switch_indices[int(uinp)] + 4
+                    uinp = valid_switch_indices[int(switch_input)] + 4
                     in_menu = False
                     return uinp
         return switch_input
@@ -141,7 +141,7 @@ def battle_menu_input(active_member_moves, team_members, valid_switch_indices = 
                 input_message = "Choose a Pokemon."
                 switch_input = switch_menu(input_message, team_members, valid_switch_indices, True)
                 if switch_input in range(len(valid_switch_indices)):
-                    uinp = valid_switch_indices[int(uinp)] + 4
+                    uinp = valid_switch_indices[int(switch_input)] + 4
                     in_menu = False
                 # List team, then list options about team
             elif minp == 2: # Run
