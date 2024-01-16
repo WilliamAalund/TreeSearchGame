@@ -53,7 +53,7 @@ class Move:
                 self.effect = move_data[9]
                 if self.effect not in IMPLEMENTED_EFFECTS and __name__ == "__main__":
                     print("The effect '", self.effect, "' is not implemented")
-                self.effect_magnitude = int(move_data[10])
+                self.effect_magnitude = float(move_data[10])
                 if move_data[11] == "Y":
                     self.makes_contact = True
                 else:

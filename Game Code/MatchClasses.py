@@ -45,6 +45,7 @@ TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1
               'Fairy':{'Normal':1, 'Fire':0.5, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':2, 'Poison':0.5, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':2, 'Dark':2, 'Steel':0.5, 'Fairy':1, 'Typeless':1},
               'Typeless':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':1, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1}}
 
+
 def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_team, can_crit = True, visualization = True, is_struggle = False, crit_chance = DEFAULT_CRIT_CHANCE):
     if can_crit:
         roll = rng.randint(1,100)
@@ -74,16 +75,18 @@ def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_te
     else:
         stab_mult = 1 # Same type attack bonus
     type_mult = 1
-    type_mult *= TYPE_CHART[move.type][target.type_1]
-    if target.type_2:
-        type_mult *= TYPE_CHART[move.type][target.type_2]
-    if visualization:
-        if type_mult > 1:
-            print("It's super effective!")
-        elif type_mult == 0:
-            print("It doesn't affect " + target.name + "...")
-        elif type_mult < 1:
-            print("It's not very effective...")
+    type_mult = get_type_multiplier(move.type, target.type_1, target.type_2)
+    #type_mult = 1
+    #type_mult *= TYPE_CHART[move.type][target.type_1]
+    #if target.type_2:
+    #    type_mult *= TYPE_CHART[move.type][target.type_2]
+    #if visualization:
+    #    if type_mult > 1:
+    #        print("It's super effective!")
+    #    elif type_mult == 0:
+    #        print("It doesn't affect " + target.name + "...")
+    #    elif type_mult < 1:
+    #        print("It's not very effective...")
     if move.category == 'Physical':
         used_attack = user.attack
         used_attack_multiplier = user.get_multiplier_for_stat(ATTACK)
@@ -107,10 +110,16 @@ def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_te
     raw_calc = ((((2*user.level / 5 + 2) * move.base_power * (used_attack / used_defense)) / 50) + 2)
     multiplier_calc = (raw_calc * crit_mult * stab_mult * type_mult * used_attack_multiplier) / used_defense_multiplier
     if visualization:
-        target_hp_max = target.get_stat(MAX_HP)
-        print(f"- {(multiplier_calc / target_hp_max) * 100:.1f} %")
+        #print(f"- {(multiplier_calc / target_hp_max) * 100:.1f} %")
         print("Raw calc (" + str(raw_calc) + ") * Crit (" + str(crit_mult) + ") * Stab (" + str(stab_mult) + ") Type (" + str(type_mult) + ") * Attack mult (" + str(used_attack_multiplier) + ") * Defense mult (" + str(used_defense_multiplier) + ") = " + str(multiplier_calc))
     return math.ceil(multiplier_calc)
+
+def get_type_multiplier(move_type, target_type_1, target_type_2 = None):
+    type_multiplier = 1
+    type_multiplier *= TYPE_CHART[move_type][target_type_1]
+    if target_type_2:
+        type_multiplier *= TYPE_CHART[move_type][target_type_2]
+    return type_multiplier
 
 def get_strongest_move_against(user_team: Team, target_team: Team): # Returns the strongest move against the enemy monster
         # For each move in the monster's moveset, calculate the damage it would do to the enemy monster
@@ -554,7 +563,7 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
             self.turn_action_summary.record_move_as_struggle()
             if self.visualization:
                 print(self.user_team.name + "'s " + self.user.name + " used Struggle on " + self.target.name + "!")
-            damage = damage_calc(self.user, self.target, self.user_team, self.target_team, Move(157), False, self.visualization)
+            damage = damage_calc(self.user, self.target, self.user_team, self.target_team, Move(160), False, self.visualization)
             self.target.HP -= damage
             self.turn_action_summary.set_damage_dealt(damage)
             if self.target.HP <= 0:
@@ -585,9 +594,18 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
 
     def do_damage(self, crit_chance = DEFAULT_CRIT_CHANCE):
         damage = damage_calc(self.user, self.target, self.move_used, self.user_team, self.target_team, self.can_crit, self.visualization, crit_chance=crit_chance)
+        type_multiplier = get_type_multiplier(self.move_used.type, self.target.type_1, self.target.type_2)
         if self.move_used.accuracy >= rng.randint(1,100):
-            #if self.visualization:
-            #    print(self.target.name + " took " + str(damage) + " damage!")
+            if self.visualization:
+                if type_multiplier > 1:
+                    print("It's super effective!", end=" ")
+                elif type_multiplier == 0:
+                    print("It doesn't affect " + self.target.name + "...", end=" ")
+                elif type_multiplier < 1:
+                    print("It's not very effective against " + self.target.name + "... ", end=" ")
+                target_hp_max = self.target.get_stat(MAX_HP)
+                print(f"- {(damage / target_hp_max) * 100:.1f} %")
+                #print(self.target.name + " took " + str(damage) + " damage!")    
             self.target.HP -= damage
             self.turn_action_summary.set_damage_dealt(damage)
             if self.target.HP <= 0:

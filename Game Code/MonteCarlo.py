@@ -5,7 +5,7 @@ from MatchClasses import GameState # Dependency for Node class
 
 # --- GLOBAL VARIABLES ---
 exploration_parameter = 1.4 # Exploration parameter for UCB formula. Higher value means more exploration. 
-ai_intelligence = 3000 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
+ai_intelligence = 10000 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
 search_depth = 15 # Depth of the search tree. Higher value means more accurate results, but more time taken.
 
 # --- MONTE CARLO TREE SEARCH CLASS ---
@@ -28,8 +28,8 @@ class MonteCarloTreeSearch:
             i += 1
         if self.verbose:
             pass
-        for child in self.root.children:
-                print("Child name: " + str(child.state.last_move) + ", UCB value: " + str(child.ucb))
+        #for child in self.root.children:
+        #        print("Child name: " + str(child.state.last_move) + ", UCB value: " + str(child.ucb))
         #print("Best move is: " + str(self.root.best_child().state.last_move) + " with a ucb value of: " + str(self.root.best_child().ucb))
         print()
         #return self.root.best_child().state.last_move

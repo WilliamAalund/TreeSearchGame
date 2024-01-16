@@ -38,12 +38,12 @@ def starter_game(random_ai = False):
     # Match bewteen two teams of 3 pokemon
     player_team = Team("Player")
     ai_team = Team("Enemy")
-    player_team.add_member(Monster(501, 15))
-    player_team.add_member(Monster(498, 15))
-    player_team.add_member(Monster(495, 15))
-    ai_team.add_member(Monster(501, 15))
-    ai_team.add_member(Monster(498, 15))
-    ai_team.add_member(Monster(495, 15))
+    player_team.add_member(Monster(SAMUROTT, 15))
+    player_team.add_member(Monster(SERPERIOR, 15))
+    player_team.add_member(Monster(EMBOAR, 15))
+    ai_team.add_member(Monster(SAMUROTT, 15))
+    ai_team.add_member(Monster(SERPERIOR, 15))
+    ai_team.add_member(Monster(EMBOAR, 15))
     match_result = match(player_team, ai_team, random_ai=random_ai)
     if match_result:
         print("Player won")
@@ -100,4 +100,4 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
     else:
         print("AI wins")
         return 0
-game()
+easy_game()

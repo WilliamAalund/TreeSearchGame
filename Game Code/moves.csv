@@ -9,150 +9,153 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 8,Double-Edge,Normal,Physical,120,100,15,101,0,Recoil,0,Y,S,Damages the user a lot.,M,,,Alter_Attack
 9,Hyper Beam,Normal,Special,150,90,5,101,0,Recharge,0,N,S,The user must recharge after use.,M,,,Alter_Defense
 10,Growl,Normal,Effect,0,100,40,101,0,Alter_Physical_Attack,-1,N,D,Lowers opponent's attack.,-,,,Alter_Attack_User
-11,Leer,Normal,Effect,0,100,30,101,0,Alter_Defense,-1,N,S,Lowers opponent's defense.,-,,,Heal_User
+11,Leer,Normal,Effect,0,100,30,101,0,Alter_Physical_Defense,-1,N,S,Lowers opponent's defense.,-,,,Heal_User
 12,Growth,Normal,Effect,0,101,20,101,0,Alter_Special_Attack_User,1,N,U,Raises user's special attack.,M,,,Reset_Status_User
 13,Swords Dance,Normal,Effect,0,101,20,101,0,Alter_Physical_Attack_User,2,N,U,Sharply raises user's attack.,M,,,Burn
-14,Recover,Normal,Effect,0,101,10,101,0,Heal_User,50,N,U,Heals user's HP.,M,,,Burn_Flinch
-15,Refresh,Normal,Effect,0,101,20,101,0,Reset_Status_User,1,N,U,Cures user of status aliments.,M,,,Alter_Special_Attack
-16,Ember,Fire,Special,40,100,40,10,0,Burn,1,N,S,Chance to burn the target.,-,,,Alter_Special_Attack_User
-17,Flame Charge,Fire,Physical,50,100,20,101,0,Alter_Speed_User,1,Y,S,Raises the user's speed.,-,,,Set_Sun
-18,Fire Fang,Fire,Physical,65,95,15,10,0,Burn_Flinch,1,Y,S,"Chance to burn the target, or cause it to flinch.",-,,,Alter_Defense_Special_Defense_Speed_User
-19,Fire Punch,Fire,Physical,75,100,15,10,0,Burn,1,Y,S,Chance to burn the target.,M,,,Fusion_Flare_Effect
-20,Mystical Fire,Fire,Special,75,100,10,101,0,Alter_Special_Attack,-1,N,S,Lowers the target's special attack.,-,,,Alter_Accuracy
-21,Flamethrower,Fire,Special,90,100,15,10,0,Burn,0,N,S,Chance to burn the target.,M,,,Flinch
-22,Fire Blast,Fire,Special,110,85,5,10,0,Burn,1,N,S,Chance to burn the target.,M,,,Confuse
-23,Overheat,Fire,Special,130,90,5,101,0,Alter_Special_Attack_User,-2,N,S,Sharply lowers the user's special attack.,M,,,Set_Rain
-24,Sunny Day,Fire,Effect,0,101,5,101,0,Set_Sun,0,N,U,Makes the weather sunny.,M,,,Raise_Defense_User
-25,Will-O-Wisp,Fire,Effect,0,85,15,101,0,Burn,0,N,S,Burns the target.,M,,,Charge
-26,V-create,Fire,Physical,180,95,5,101,0,Alter_Physical_Defense_Special_Defense_Speed_User,-1,N,S,"Lowers the user's defense, special defense, and speed.",-,,,Fusion_Bolt_Effect
-27,Fusion Flare,Fire,Special,100,100,5,101,0,Fusion_Flare_Effect,0,N,S,Power increases if Fusion Bolt is used in the same turn.,-,,,Heal_Damage
-28,Water Gun,Water,Special,40,100,25,0,0,None,0,N,S,,-,,,Damage_Based_On_Weight
-29,Surf,Water,Special,90,100,15,0,0,None,0,N,D,,M,,,Sleep
-30,Hydro Pump,Water,Special,110,80,5,0,0,None,0,N,S,,M,,,Synthesis_Heal
-31,Muddy Water,Water,Special,90,85,10,30,0,Alter_Accuracy,-1,N,D,Chance to lower the target's accuracy.,-,,,Freeze
-32,Waterfall,Water,Physical,80,100,15,20,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,Freeze_Flinch
-33,Water Pulse,Water,Special,60,100,20,20,0,Confuse,0,N,S,Chance to confuse the target.,R,,,Set_Hail
-34,Razor Shell,Water,Physical,75,95,10,12.5,0,High_Crit,0,N,S,,-,,,Reset_Stat_Changes
-35,Aqua Jet,Water,Physical,40,100,20,0,1,None,0,Y,S,,R,,,Counter
-36,Rain Dance,Water,Effect,0,101,5,0,0,Set_Rain,0,N,U,Makes the weather rainy.,M,,,Alter_Attack_Defense_User
-37,Withdraw,Water,Effect,0,101,40,101,0,Alter_Physical_Defense_User,1,N,U,Raises user's defense.,-,,,Alter_Defense_Special_Defense
-38,Thundershock,Electric,Special,40,100,30,10,0,Paralyze,1,N,S,Chance to paralyze the target.,-,,,Tighten_Focus
-39,Thunderbolt,Electric,Special,90,100,15,10,0,Paralyze,1,N,S,Chance to paralyze the target.,M,,,Alter_Speed_User
-40,Thunder,Electric,Special,110,70,10,30,0,Paralyze,1,N,S,Chance to paralyze the target.,M,,,Double_Damage_If_Attacked
-41,Spark,Electric,Physical,65,100,20,30,0,Paralyze,1,N,S,Chance to paralyze the target.,R,,,Ignore_Stat_Changes
-42,Thunder Wave,Electric,Effect,0,90,20,101,0,Paralyze,1,N,,,M,,,Used_Defense_Is_Defense
-43,Charge,Electric,Effect,0,101,20,101,0,Charge,1,N,U,Raises user's special defense. Electric moves are stronger next turn.,M,,,
-44,Fusion Bolt,Electric,Physical,100,100,5,101,0,Fusion_Bolt_Effect,1,N,S,Power increases if Fusion Flare is used in the same turn.,-,,,
-45,Charge Beam,Electric,Special,50,90,10,70,0,Alter_Special_Attack_User,1,N,S,Chance to raise user's special attack.,M,,,
-46,Absorb,Grass,Special,20,100,25,101,0,Heal_Damage,50,N,S,User recovers hald the damage inflicted on target.,-,,,
-47,Vine Whip,Grass,Physical,45,100,25,0,0,None,0,N,S,,-,,,
-48,Mega Drain,Grass,Special,40,100,15,101,0,Heal_Damage,50,N,S,User recovers hald the damage inflicted on target.,R,,,
-49,Giga Drain,Grass,Special,75,100,10,101,0,Heal_Damage,50,N,S,User recovers hald the damage inflicted on target.,M,,,
-50,Energy Ball,Grass,Special,90,100,10,0,0,None,0,N,S,,M,,,
-51,Grass Knot,Grass,Physical,0,100,20,101,0,Damage_Based_On_Weight,0,N,S,"The heavier the target, the stronger the attack.",M,,,
-52,Leaf Storm,Grass,Special,130,90,5,101,0,Alter_Special_Attack_User,-2,N,S,Sharply lowers user's special attack.,M,,,
-53,Power Whip,Grass,Physical,120,85,10,0,0,None,0,Y,S,,N,,,
-54,Grass Whistle,Grass,Effect,0,55,15,101,0,Sleep,0,N,S,Puts target to sleep.,M,,,
-55,Sleep Powder,Grass,Effect,0,75,15,101,0,Sleep,0,N,S,Puts target to sleep.,-,,,
-56,Spore,Grass,Effect,0,100,15,101,0,Sleep,1,N,S,Puts target to sleep.,-,,,
-57,Synthesis,Grass,Effect,0,101,5,101,0,Synthesis_Heal,50,N,U,Heals user's HP. Healing varies in weather.,M,,,
-58,Ice Shard,Ice,Physical,40,100,30,0,1,None,0,N,S,User attacks first.,M,,,
-59,Powder Snow,Ice,Special,40,100,25,10,0,Freeze,0,N,S,Chance to freeze the target.,-,,,
-60,Ice Fang,Ice,Physical,65,95,15,10,0,Freeze_Flinch,0,Y,S,"Chance to freeze the target, or cause it to flinch.",R,,,
-61,Ice Punch,Ice,Physical,75,100,15,10,0,Freeze,0,Y,S,Chance to freeze the target.,M,,,
-62,Ice Beam,Ice,Special,90,100,10,10,0,Freeze,0,N,S,Chance to freeze the target.,M,,,
-63,Blizzard,Ice,Special,110,70,5,10,0,Freeze,0,N,S,Chance to freeze the target.,M,,,
-64,Hail,Ice,Effect,0,101,10,101,0,Set_Hail,0,N,U,Makes the weather hail.,M,,,
-65,Haze,Ice,Effect,0,101,30,101,0,Reset_Stat_Changes,0,N,U,Resets all stat changes.,R,,,
-66,Vaccum Wave,Fighting,Physical,40,100,30,0,1,None,0,N,S,User attacks first.,-,,,
-67,Rock Smash,Fighting,Physical,40,100,15,50,0,Alter_Defense,-1,N,S,Chance to lower the target's defense.,R,,,
-68,Power-Up Punch,Fighting,Physical,40,100,20,101,0,Alter_Physical_Attack_User,1,Y,S,Raises user's attack.,M,,,
-69,Aura Sphere,Fighting,Special,80,101,20,0,0,None,0,N,S,,M,,,
-70,Counter,Fighting,Effect,0,101,20,101,0,Counter,0,Y,S,"When hit by a physical attack, the user strikes back with double power.",R,,,
-71,Superpower,Fighting,Physical,120,100,5,101,0,Alter_Physical_Attack_Physical_Defense_User,-1,Y,S,Lowers user's attack and defense.,M,,,
-72,Close Combat,Fighting,Physical,120,100,5,101,0,Alter_Physical_Defense_Special_Defense,-1,Y,S,,M,,,
-73,Focus Punch,Fighting,Physical,150,100,20,101,8,Tighten_Focus,0,Y,S,"The user tightens its focus. If it is not attacked, it will attack after all other moves.",-,,,
-74,Hammer Arm,Fighting,Physical,100,90,10,101,0,Alter_Speed_User,-1,Y,S,Lowers user's speed.,M,,,
-75,Revenge,Fighting,Physical,60,100,10,101,0,Double_Damage_If_Attacked,0,Y,S,Power increases if user was hit first.,-,,,
-76,Sacred Sword,Fighting,Physical,90,100,15,101,0,Ignore_Stat_Changes,0,Y,S,Ignores target's stat changes.,-,,,
-77,Secret Sword,Fighting,Special,85,100,10,101,0,Used_Defense_Is_Defense,0,N,S,"Inflicts damage based on the target's defense, not special defense.",-,,,
-78,Acid,Poison,Special,40,100,30,10,0,Alter_Special_Defense,-1,N,S,May lower the target's special defense.,R,,,
-79,Acid Spray,Poison,Special,40,100,20,101,0,Alter_Special_Defense,-2,N,S,Sharply lowers the target's special defense.,M,,,
-80,Coil,Poison,Effect,0,101,20,101,0,Alter_Physical_Attack_Physical_Defense_Accuracy_User,1,N,U,"Raises the user's attack, defense and accuracy.",R,,,
-81,Poison Powder,Poison,Effect,0,75,35,101,0,Poison,0,N,S,Poisons opponent.,N,,,
-82,Sludge,Poison,Special,65,100,20,30,0,Poison,0,N,S,Chance to poison the target.,R,,,
-83,Sludge Bomb,Poison,Special,90,100,10,30,0,Poison,0,N,S,Chance to poison the target.,M,,,
-84,Toxic,Poison,Effect,0,90,10,101,0,Badly_Poison,0,N,S,Badly poisons the target.,M,,,
-85,Smog,Poison,Special,30,70,20,10,0,Poison,0,N,S ,Chance to poison the target.,-,,,
-86,Poison Jab,Poison,Physical,80,100,20,30,0,Poison,0,Y,S,Chance to poison the target.,M,,,
-87,Gunk Shot,Poison,Physical,120,80,5,30,0,Poison,0,N,S,Chance to poison the target.,M,,,
-88,Earth Power,Ground,Special,90,100,10,10,0,Lower_Special_Defense,0,N,S,May lower the target's special defense.,M,,,
-89,Earthquake,Ground,Physical,100,100,10,0,0,None,0,N,S,,M,,,
-90,Bulldoze,Ground,Physical,60,20,20,101,0,Lower_Speed,0,N,S,Lowers the target's speed.,R,,,
-91,Sand Tomb,Ground,Physical,35,85,15,101,0,Sand_Tomb_Trap,0,N,S,"Traps opponent, damaging them for 4-5 turns.",R,,,
-92,Bone Rush,Ground,Physical,25,90,10,101,0,Multi_Hit,5,Y,S,Hits opponent 2 - 5 times in a row.,M,,,
-93,Drill Run,Ground,Physical,80,95,10,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,M,,,
-94,Sand Attack,Ground,Effect,0,100,15,101,0,Lower_Accuracy,0,N,S,Lowers target's accuracy.,-,,,
-95,Gust,Flying,Special,40,100,35,0,0,None,0,N,S,,-,,,
-96,Peck,Flying,Special,35,100,35,0,0,None,0,N,S,,-,,,
-97,Roost,Flying,Effect,0,101,5,101,0,Heal_User,0,N,U,Heals user.,-,,,
-98,Wing Attack,Flying,Physical,60,100,35,0,0,None,0,N,S,,-,,,
-99,Air Slash,Flying,Special,75,95,25,30,0,Flinch,0,N,S,Chance to cause target to flinch.,-,,,
-100,Aerial Ace,Flying,Physical,60,101,20,0,0,None,0,Y,S,This move never misses.,R,,,
-101,Drill Peck,Flying,Physical,80,100,20,0,0,None,0,Y,S,,M,,,
-102,Hurricane,Flying,Special,110,70,10,30,0,Confuse,0,N,S,Chance to confuse the target.,M,,,
-103,Confusion,Psychic,Effect,50,100,25,10,0,Confuse,0,N,S,Chance to confuse the target.,-,,,
-104,Psybeam,Psychic,Special,60,100,20,10,0,Confuse,0,N,S,Chance to confuse the target.,R,,,
-105,Extrasensory,Psychic,Special,80,100,20,10,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,
-106,Psychic,Psychic,Special,90,100,10,10,0,Alter_Special_Defense,-1,N,S,Chance to lower the target's special defense.,M,,,
-107,Heart Stamp,Psychic,Physical,60,100,25,30,0,Flinch,0,Y,S,Chance to cause target to flinch.,-,,,
-108,Psyshock,Psychic,Special,80,100,10,101,0,Used_Defense_Is_Defense,0,N,S,"Inflicts damage based on the target's defense, not special defense.",M,,,
-109,Zen Headbutt,Psychic,Physical,80,90,15,20,0,Flinch,0,Y,S,Chance to cause target to flinch.,-,,,
-110,Calm Mind,Psychic,Effect,0,101,20,101,0,Alter_Special_Attack_Special_Defense_User,1,N,U,Raises the user's special attack and special defense.,M,,,
-111,Rest,Psychic,Effect,0,101,5,101,0,Rest,0,N,U,"User is fully healed, but falls asleep.",M,T,,
-112,Agility,Psychic,Effect,0,101,30,101,0,Alter_Speed_User,2,N,U,Sharply raises the user's speed.,R,,,
-113,Pin Missle,Bug,Physical,25,95,20,101,0,Multi_Hit,5,N,S,Hits opponent 2 - 5 times in a row.,-,,,
-114,Megahorn,Bug,Physical,120,85,10,0,0,None,0,Y,S,,M,,,
-115,Signal Beam,Bug,Special,75,100,15,10,0,Confuse,0,N,S,Chance to confuse the target.,M,,,
-116,X-Scissor,Bug,Physical,80,100,15,0,0,None,0,Y,S,,M,,,
-117,Struggle Bug,Bug,Special,50,100,20,101,0,Alter_Special_Attack,-1,N,S,Lowers the target's special attack.,-,,,
-118,Quiver Dance,Bug,Effect,0,101,20,101,0,Alter_Special_Attack_Special_Defense_Speed,1,N,U,"Raises the user's special attack, special defense, and speed.",-,,,
-119,String Shot,Bug,Effect,0,95,40,101,0,Alter_Speed,-2,N,S,Sharply lowers the target's speed.,-,,,
-120,Rock Slide,Rock,Physical,75,90,10,30,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,
-121,Power Gem,Rock,Special,80,100,20,0,0,None,0,N,S,,M,,,
-122,Rock Tomb,Rock,Physical,60,95,15,101,0,Alter_Speed,-1,N,S,Lowers the target's speed.,M,,,
-123,Sandstorm,Rock,Effect,0,101,10,101,0,Set_Sandstorm,0,N,U,Makes the weather a sandstorm.,M,,,
-124,Stone Edge,Rock,Physical,100,80,5,12.5,0,High_Crit,0,N,S,High critical hit ratio.,M,,,
-125,Head Smash,Rock,Physical,150,80,5,101,0,Recoil,0.33,Y,S,Damages the user a lot.,M,,,
-126,Ancient Power,Rock,Special,60,100,5,10,0,Omniboost,1,N,S,Chance to raise all of the user's stats.,M,,,
-127,Lick,Ghost,Physical,30,100,30,30,0,Paralyze,0,Y,S,Chance to paralyze the target.,-,,,
-128,Shadow Claw,Ghost,Physical,70,100,15,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,R,,,
-129,Shadow Sneak,Ghost,Physical,40,100,30,0,1,None,0,Y,S,User attacks first.,-,,,
-130,Shadow Ball,Ghost,Special,80,100,15,20,0,Alter_Special_Defense,-1,N,S,Chance to lower the target's special defense.,M,,,
-131,Hex,Ghost,Special,65,100,10,101,0,Double_Damage_If_Target_Statused,0,N,S,Inflicts double the damage if the target has a status condition.,M,,,
-132,Confuse Ray,Ghost,Effect,0,100,10,101,0,Confuse,0,N,S,Confuses the target.,M,,,
-133,Dragon Rage,Dragon,Special,0,100,10,101,0,40_Damage,0,N,S,Always inflicts 40 HP of damage on the target.,-,,,
-134,Dragon Pulse,Dragon,Special,85,100,10,0,0,None,0,N,S,,M,,,
-135,Dragon Claw,Dragon,Physical,80,100,15,0,0,None,0,N,S,,M,,,
-136,Draco Meteor,Dragon,Special,130,90,5,0,0,Alter_Special_Attack_User,-2,N,S,Sharply lowers the user's special attack.,M,,,
-137,Dual Chop,Dragon,Physical,40,90,15,101,0,Multi_Hit,2,Y,S,Hits the target twice in a row.,-,,,
-138,Dragon Dance,Dragon,Effect,0,101,20,101,0,Alter_Physical_Attack_Speed_User,1,N,U,Raises the user's attack and speed.,M,,,
-139,Bite,Dark,Physical,60,100,25,30,0,Flinch,0,Y,S,Chance to cause target to flinch.,-,,,
-140,Crunch,Dark,Physical,80,100,15,20,0,Alter_Physical_Defense,-1,Y,S,Chance to lower the target's defense.,-,,,
-141,Dark Pulse,Dark,Special,80,100,15,20,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,
-142,Snarl,Dark,Special,55,95,15,101,0,Alter_Special_Attack,-1,N,S,Chance to lower the target's special attack.,R,,,
-143,Taunt,Dark,Effect,0,100,20,101,0,Prevent_Effect_Moves,0,N,S,Opponent can only use moves that attack.,R,T,,
-144,Night Slash,Dark,Physical,70,100,15,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,M,,,
-145,Gear Grind,Steel,Physical,50,85,15,101,0,Multi_Hit,2,Y,S,Hits the target twice in a row.,-,,,
-146,Iron Tail,Steel,Physical,100,75,15,30,0,Alter_Defense,-1,Y,S,Chance to loer the target's defense.,M,,,
-147,Magnet Bomb,Steel,Physical,60,101,20,0,0,None,0,N,S,This move never misses.,-,,,
-148,Steel Wing,Steel,Physical,70,90,25,10,0,Alter_Defense_User,1,Y,S,May raise the user's defense.,M,,,
-149,Iron Head,Steel,Physical,80,100,15,30,0,Flinch,0,Y,S,Chance to cause target to flinch.,M,,,
-150,Flash Cannon,Steel,Special,80,100,10,10,0,Alter_Special_Defense,-1,N,S,Chance to lower the target's special defense.,M,,,
-151,Mirror Shot,Steel,Special,65,85,10,30,0,Alter_Accuracy,-1,N,S,Chance to lower the target's accuracy.,-,,,
-152,Iron Defense,Steel,Effect,0,101,15,101,0,Alter_Physical_Defense_User,2,N,U,Sharply raises the user's defense.,R,,,
-153,Shift Gear,Steel,Effect,0,101,10,101,0,Shift_Gear,1,N,U,"Raises the user's attack, and sharply raises the user's speed.",-,,,
-154,Moonblast,Fairy,Special,95,100,15,30,0,Alter_Special_Attack,-1,N,S,Chance to lower the target's special attack.,M,,,
-155,Play Rough,Fairy,Physical,90,90,10,10,0,Alter_Physical_Attack,-1,N,S,Chance to lower the target's attack.,M,,,
-156,Fairy Wind,Fairy,Physical,40,100,30,30,0,None,0,N,S,,-,,,
-157,Struggle,Typeless,Physical,50,101,0,0,0,Recoil,0,N,S,Only usable when all PP are gone. Hurts the user.,-,Move not used in actual struggle damage calc,,
+14,Work Up,Normal,Effect,0,101,30,101,0,Alter_Physical_Attack_Special_Attack_User,1,N,U,Raises the user's attack and special attack.,,,,
+15,Recover,Normal,Effect,0,101,10,101,0,Heal_User,50,N,U,Heals user's HP.,M,,,Burn_Flinch
+16,Refresh,Normal,Effect,0,101,20,101,0,Reset_Status_User,1,N,U,Cures user of status aliments.,M,,,Alter_Special_Attack
+17,Ember,Fire,Special,40,100,40,10,0,Burn,1,N,S,Chance to burn the target.,-,,,Alter_Special_Attack_User
+18,Flame Charge,Fire,Physical,50,100,20,101,0,Alter_Speed_User,1,Y,S,Raises the user's speed.,-,,,Set_Sun
+19,Fire Fang,Fire,Physical,65,95,15,10,0,Burn_Flinch,1,Y,S,"Chance to burn the target, or cause it to flinch.",-,,,Alter_Defense_Special_Defense_Speed_User
+20,Fire Punch,Fire,Physical,75,100,15,10,0,Burn,1,Y,S,Chance to burn the target.,M,,,Fusion_Flare_Effect
+21,Mystical Fire,Fire,Special,75,100,10,101,0,Alter_Special_Attack,-1,N,S,Lowers the target's special attack.,-,,,Alter_Accuracy
+22,Flamethrower,Fire,Special,90,100,15,10,0,Burn,0,N,S,Chance to burn the target.,M,,,Flinch
+23,Fire Blast,Fire,Special,110,85,5,10,0,Burn,1,N,S,Chance to burn the target.,M,,,Confuse
+24,Overheat,Fire,Special,130,90,5,101,0,Alter_Special_Attack_User,-2,N,S,Sharply lowers the user's special attack.,M,,,Set_Rain
+25,Sunny Day,Fire,Effect,0,101,5,101,0,Set_Sun,0,N,U,Makes the weather sunny.,M,,,Raise_Defense_User
+26,Will-O-Wisp,Fire,Effect,0,85,15,101,0,Burn,0,N,S,Burns the target.,M,,,Charge
+27,V-create,Fire,Physical,180,95,5,101,0,Alter_Physical_Defense_Special_Defense_Speed_User,-1,N,S,"Lowers the user's defense, special defense, and speed.",-,,,Fusion_Bolt_Effect
+28,Fusion Flare,Fire,Special,100,100,5,101,0,Fusion_Flare_Effect,0,N,S,Power increases if Fusion Bolt is used in the same turn.,-,,,Heal_Damage
+29,Water Gun,Water,Special,40,100,25,0,0,None,0,N,S,,-,,,Damage_Based_On_Weight
+30,Surf,Water,Special,90,100,15,0,0,None,0,N,D,,M,,,Sleep
+31,Hydro Pump,Water,Special,110,80,5,0,0,None,0,N,S,,M,,,Synthesis_Heal
+32,Muddy Water,Water,Special,90,85,10,30,0,Alter_Accuracy,-1,N,D,Chance to lower the target's accuracy.,-,,,Freeze
+33,Waterfall,Water,Physical,80,100,15,20,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,Freeze_Flinch
+34,Water Pulse,Water,Special,60,100,20,20,0,Confuse,0,N,S,Chance to confuse the target.,R,,,Set_Hail
+35,Razor Shell,Water,Physical,75,95,10,12.5,0,High_Crit,0,N,S,,-,,,Reset_Stat_Changes
+36,Aqua Jet,Water,Physical,40,100,20,0,1,None,0,Y,S,,R,,,Counter
+37,Rain Dance,Water,Effect,0,101,5,0,0,Set_Rain,0,N,U,Makes the weather rainy.,M,,,Alter_Attack_Defense_User
+38,Withdraw,Water,Effect,0,101,40,101,0,Alter_Physical_Defense_User,1,N,U,Raises user's defense.,-,,,Alter_Defense_Special_Defense
+39,Thundershock,Electric,Special,40,100,30,10,0,Paralyze,1,N,S,Chance to paralyze the target.,-,,,Tighten_Focus
+40,Thunderbolt,Electric,Special,90,100,15,10,0,Paralyze,1,N,S,Chance to paralyze the target.,M,,,Alter_Speed_User
+41,Thunder,Electric,Special,110,70,10,30,0,Paralyze,1,N,S,Chance to paralyze the target.,M,,,Double_Damage_If_Attacked
+42,Spark,Electric,Physical,65,100,20,30,0,Paralyze,1,N,S,Chance to paralyze the target.,R,,,Ignore_Stat_Changes
+43,Wild Charge,Electric,Physical,90,100,15,101,0,Moderate_Recoil,25,Y,S,Damages the user a little.,M,,,Used_Defense_Is_Defense
+44,Thunder Wave,Electric,Effect,0,90,20,101,0,Paralyze,1,N,,,M,,,
+45,Charge,Electric,Effect,0,101,20,101,0,Charge,1,N,U,Raises user's special defense. Electric moves are stronger next turn.,M,,,
+46,Fusion Bolt,Electric,Physical,100,100,5,101,0,Fusion_Bolt_Effect,1,N,S,Power increases if Fusion Flare is used in the same turn.,-,,,
+47,Charge Beam,Electric,Special,50,90,10,70,0,Alter_Special_Attack_User,1,N,S,Chance to raise user's special attack.,M,,,
+48,Absorb,Grass,Special,20,100,25,101,0,Heal_Damage,50,N,S,User recovers hald the damage inflicted on target.,-,,,
+49,Vine Whip,Grass,Physical,45,100,25,0,0,None,0,N,S,,-,,,
+50,Mega Drain,Grass,Special,40,100,15,101,0,Heal_Damage,50,N,S,User recovers hald the damage inflicted on target.,R,,,
+51,Giga Drain,Grass,Special,75,100,10,101,0,Heal_Damage,50,N,S,User recovers hald the damage inflicted on target.,M,,,
+52,Energy Ball,Grass,Special,90,100,10,0,0,None,0,N,S,,M,,,
+53,Grass Knot,Grass,Physical,0,100,20,101,0,Damage_Based_On_Weight,0,N,S,"The heavier the target, the stronger the attack.",M,,,
+54,Leaf Storm,Grass,Special,130,90,5,101,0,Alter_Special_Attack_User,-2,N,S,Sharply lowers user's special attack.,M,,,
+55,Power Whip,Grass,Physical,120,85,10,0,0,None,0,Y,S,,N,,,
+56,Grass Whistle,Grass,Effect,0,55,15,101,0,Sleep,0,N,S,Puts target to sleep.,M,,,
+57,Sleep Powder,Grass,Effect,0,75,15,101,0,Sleep,0,N,S,Puts target to sleep.,-,,,
+58,Spore,Grass,Effect,0,100,15,101,0,Sleep,1,N,S,Puts target to sleep.,-,,,
+59,Synthesis,Grass,Effect,0,101,5,101,0,Synthesis_Heal,50,N,U,Heals user's HP. Healing varies in weather.,M,,,
+60,Ice Shard,Ice,Physical,40,100,30,0,1,None,0,N,S,User attacks first.,M,,,
+61,Powder Snow,Ice,Special,40,100,25,10,0,Freeze,0,N,S,Chance to freeze the target.,-,,,
+62,Ice Fang,Ice,Physical,65,95,15,10,0,Freeze_Flinch,0,Y,S,"Chance to freeze the target, or cause it to flinch.",R,,,
+63,Ice Punch,Ice,Physical,75,100,15,10,0,Freeze,0,Y,S,Chance to freeze the target.,M,,,
+64,Ice Beam,Ice,Special,90,100,10,10,0,Freeze,0,N,S,Chance to freeze the target.,M,,,
+65,Blizzard,Ice,Special,110,70,5,10,0,Freeze,0,N,S,Chance to freeze the target.,M,,,
+66,Hail,Ice,Effect,0,101,10,101,0,Set_Hail,0,N,U,Makes the weather hail.,M,,,
+67,Haze,Ice,Effect,0,101,30,101,0,Reset_Stat_Changes,0,N,U,Resets all stat changes.,R,,,
+68,Vaccum Wave,Fighting,Physical,40,100,30,0,1,None,0,N,S,User attacks first.,-,,,
+69,Rock Smash,Fighting,Physical,40,100,15,50,0,Alter_Defense,-1,N,S,Chance to lower the target's defense.,R,,,
+70,Power-Up Punch,Fighting,Physical,40,100,20,101,0,Alter_Physical_Attack_User,1,Y,S,Raises user's attack.,M,,,
+71,Aura Sphere,Fighting,Special,80,101,20,0,0,None,0,N,S,,M,,,
+72,Counter,Fighting,Effect,0,101,20,101,0,Counter,0,Y,S,"When hit by a physical attack, the user strikes back with double power.",R,,,
+73,Superpower,Fighting,Physical,120,100,5,101,0,Alter_Physical_Attack_Physical_Defense_User,-1,Y,S,Lowers user's attack and defense.,M,,,
+74,Close Combat,Fighting,Physical,120,100,5,101,0,Alter_Physical_Defense_Special_Defense,-1,Y,S,,M,,,
+75,Focus Punch,Fighting,Physical,150,100,20,101,8,Tighten_Focus,0,Y,S,"The user tightens its focus. If it is not attacked, it will attack after all other moves.",-,,,
+76,Hammer Arm,Fighting,Physical,100,90,10,101,0,Alter_Speed_User,-1,Y,S,Lowers user's speed.,M,,,
+77,Revenge,Fighting,Physical,60,100,10,101,0,Double_Damage_If_Attacked,0,Y,S,Power increases if user was hit first.,-,,,
+78,Sacred Sword,Fighting,Physical,90,100,15,101,0,Ignore_Stat_Changes,0,Y,S,Ignores target's stat changes.,-,,,
+79,Secret Sword,Fighting,Special,85,100,10,101,0,Used_Defense_Is_Defense,0,N,S,"Inflicts damage based on the target's defense, not special defense.",-,,,
+80,Acid,Poison,Special,40,100,30,10,0,Alter_Special_Defense,-1,N,S,May lower the target's special defense.,R,,,
+81,Acid Spray,Poison,Special,40,100,20,101,0,Alter_Special_Defense,-2,N,S,Sharply lowers the target's special defense.,M,,,
+82,Coil,Poison,Effect,0,101,20,101,0,Alter_Physical_Attack_Physical_Defense_Accuracy_User,1,N,U,"Raises the user's attack, defense and accuracy.",R,,,
+83,Poison Powder,Poison,Effect,0,75,35,101,0,Poison,0,N,S,Poisons opponent.,N,,,
+84,Sludge,Poison,Special,65,100,20,30,0,Poison,0,N,S,Chance to poison the target.,R,,,
+85,Sludge Bomb,Poison,Special,90,100,10,30,0,Poison,0,N,S,Chance to poison the target.,M,,,
+86,Toxic,Poison,Effect,0,90,10,101,0,Badly_Poison,0,N,S,Badly poisons the target.,M,,,
+87,Smog,Poison,Special,30,70,20,10,0,Poison,0,N,S ,Chance to poison the target.,-,,,
+88,Poison Jab,Poison,Physical,80,100,20,30,0,Poison,0,Y,S,Chance to poison the target.,M,,,
+89,Gunk Shot,Poison,Physical,120,80,5,30,0,Poison,0,N,S,Chance to poison the target.,M,,,
+90,Earth Power,Ground,Special,90,100,10,10,0,Lower_Special_Defense,0,N,S,May lower the target's special defense.,M,,,
+91,Earthquake,Ground,Physical,100,100,10,0,0,None,0,N,S,,M,,,
+92,Bulldoze,Ground,Physical,60,20,20,101,0,Lower_Speed,0,N,S,Lowers the target's speed.,R,,,
+93,Sand Tomb,Ground,Physical,35,85,15,101,0,Sand_Tomb_Trap,0,N,S,"Traps opponent, damaging them for 4-5 turns.",R,,,
+94,Bone Rush,Ground,Physical,25,90,10,101,0,Multi_Hit,5,Y,S,Hits opponent 2 - 5 times in a row.,M,,,
+95,Drill Run,Ground,Physical,80,95,10,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,M,,,
+96,Sand Attack,Ground,Effect,0,100,15,101,0,Lower_Accuracy,0,N,S,Lowers target's accuracy.,-,,,
+97,Gust,Flying,Special,40,100,35,0,0,None,0,N,S,,-,,,
+98,Peck,Flying,Special,35,100,35,0,0,None,0,N,S,,-,,,
+99,Roost,Flying,Effect,0,101,5,101,0,Heal_User,0,N,U,Heals user.,-,,,
+100,Wing Attack,Flying,Physical,60,100,35,0,0,None,0,N,S,,-,,,
+101,Air Slash,Flying,Special,75,95,25,30,0,Flinch,0,N,S,Chance to cause target to flinch.,-,,,
+102,Aerial Ace,Flying,Physical,60,101,20,0,0,None,0,Y,S,This move never misses.,R,,,
+103,Drill Peck,Flying,Physical,80,100,20,0,0,None,0,Y,S,,M,,,
+104,Hurricane,Flying,Special,110,70,10,30,0,Confuse,0,N,S,Chance to confuse the target.,M,,,
+105,Confusion,Psychic,Effect,50,100,25,10,0,Confuse,0,N,S,Chance to confuse the target.,-,,,
+106,Psybeam,Psychic,Special,60,100,20,10,0,Confuse,0,N,S,Chance to confuse the target.,R,,,
+107,Extrasensory,Psychic,Special,80,100,20,10,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,
+108,Psychic,Psychic,Special,90,100,10,10,0,Alter_Special_Defense,-1,N,S,Chance to lower the target's special defense.,M,,,
+109,Heart Stamp,Psychic,Physical,60,100,25,30,0,Flinch,0,Y,S,Chance to cause target to flinch.,-,,,
+110,Psyshock,Psychic,Special,80,100,10,101,0,Used_Defense_Is_Defense,0,N,S,"Inflicts damage based on the target's defense, not special defense.",M,,,
+111,Zen Headbutt,Psychic,Physical,80,90,15,20,0,Flinch,0,Y,S,Chance to cause target to flinch.,-,,,
+112,Calm Mind,Psychic,Effect,0,101,20,101,0,Alter_Special_Attack_Special_Defense_User,1,N,U,Raises the user's special attack and special defense.,M,,,
+113,Rest,Psychic,Effect,0,101,5,101,0,Rest,0,N,U,"User is fully healed, but falls asleep.",M,T,,
+114,Agility,Psychic,Effect,0,101,30,101,0,Alter_Speed_User,2,N,U,Sharply raises the user's speed.,R,,,
+115,Pin Missle,Bug,Physical,25,95,20,101,0,Multi_Hit,5,N,S,Hits opponent 2 - 5 times in a row.,-,,,
+116,Megahorn,Bug,Physical,120,85,10,0,0,None,0,Y,S,,M,,,
+117,Signal Beam,Bug,Special,75,100,15,10,0,Confuse,0,N,S,Chance to confuse the target.,M,,,
+118,X-Scissor,Bug,Physical,80,100,15,0,0,None,0,Y,S,,M,,,
+119,Struggle Bug,Bug,Special,50,100,20,101,0,Alter_Special_Attack,-1,N,S,Lowers the target's special attack.,-,,,
+120,Quiver Dance,Bug,Effect,0,101,20,101,0,Alter_Special_Attack_Special_Defense_Speed,1,N,U,"Raises the user's special attack, special defense, and speed.",-,,,
+121,String Shot,Bug,Effect,0,95,40,101,0,Alter_Speed,-2,N,S,Sharply lowers the target's speed.,-,,,
+122,Rock Slide,Rock,Physical,75,90,10,30,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,
+123,Power Gem,Rock,Special,80,100,20,0,0,None,0,N,S,,M,,,
+124,Rock Tomb,Rock,Physical,60,95,15,101,0,Alter_Speed,-1,N,S,Lowers the target's speed.,M,,,
+125,Sandstorm,Rock,Effect,0,101,10,101,0,Set_Sandstorm,0,N,U,Makes the weather a sandstorm.,M,,,
+126,Stone Edge,Rock,Physical,100,80,5,12.5,0,High_Crit,0,N,S,High critical hit ratio.,M,,,
+127,Head Smash,Rock,Physical,150,80,5,101,0,Recoil,0.33,Y,S,Damages the user a lot.,M,,,
+128,Ancient Power,Rock,Special,60,100,5,10,0,Omniboost,1,N,S,Chance to raise all of the user's stats.,M,,,
+129,Lick,Ghost,Physical,30,100,30,30,0,Paralyze,0,Y,S,Chance to paralyze the target.,-,,,
+130,Shadow Claw,Ghost,Physical,70,100,15,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,R,,,
+131,Shadow Sneak,Ghost,Physical,40,100,30,0,1,None,0,Y,S,User attacks first.,-,,,
+132,Shadow Ball,Ghost,Special,80,100,15,20,0,Alter_Special_Defense,-1,N,S,Chance to lower the target's special defense.,M,,,
+133,Hex,Ghost,Special,65,100,10,101,0,Double_Damage_If_Target_Statused,0,N,S,Inflicts double the damage if the target has a status condition.,M,,,
+134,Confuse Ray,Ghost,Effect,0,100,10,101,0,Confuse,0,N,S,Confuses the target.,M,,,
+135,Dragon Rage,Dragon,Special,0,100,10,101,0,40_Damage,0,N,S,Always inflicts 40 HP of damage on the target.,-,,,
+136,Dragon Pulse,Dragon,Special,85,100,10,0,0,None,0,N,S,,M,,,
+137,Dragon Claw,Dragon,Physical,80,100,15,0,0,None,0,N,S,,M,,,
+138,Draco Meteor,Dragon,Special,130,90,5,0,0,Alter_Special_Attack_User,-2,N,S,Sharply lowers the user's special attack.,M,,,
+139,Dual Chop,Dragon,Physical,40,90,15,101,0,Multi_Hit,2,Y,S,Hits the target twice in a row.,-,,,
+140,Dragon Dance,Dragon,Effect,0,101,20,101,0,Alter_Physical_Attack_Speed_User,1,N,U,Raises the user's attack and speed.,M,,,
+141,Bite,Dark,Physical,60,100,25,30,0,Flinch,0,Y,S,Chance to cause target to flinch.,-,,,
+142,Crunch,Dark,Physical,80,100,15,20,0,Alter_Physical_Defense,-1,Y,S,Chance to lower the target's defense.,-,,,
+143,Dark Pulse,Dark,Special,80,100,15,20,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,
+144,Snarl,Dark,Special,55,95,15,101,0,Alter_Special_Attack,-1,N,S,Chance to lower the target's special attack.,R,,,
+145,Taunt,Dark,Effect,0,100,20,101,0,Prevent_Effect_Moves,0,N,S,Opponent can only use moves that attack.,R,T,,
+146,Night Slash,Dark,Physical,70,100,15,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,M,,,
+147,Gear Grind,Steel,Physical,50,85,15,101,0,Multi_Hit,2,Y,S,Hits the target twice in a row.,-,,,
+148,Iron Tail,Steel,Physical,100,75,15,30,0,Alter_Defense,-1,Y,S,Chance to loer the target's defense.,M,,,
+149,Magnet Bomb,Steel,Physical,60,101,20,0,0,None,0,N,S,This move never misses.,-,,,
+150,Steel Wing,Steel,Physical,70,90,25,10,0,Alter_Defense_User,1,Y,S,May raise the user's defense.,M,,,
+151,Metal Claw,Steel,Physical,50,95,35,10,0,Alter_Physical_Attack_User,1,Y,S,Chance to raise the user's attack.,,,,
+152,Iron Head,Steel,Physical,80,100,15,30,0,Flinch,0,Y,S,Chance to cause target to flinch.,M,,,
+153,Flash Cannon,Steel,Special,80,100,10,10,0,Alter_Special_Defense,-1,N,S,Chance to lower the target's special defense.,M,,,
+154,Mirror Shot,Steel,Special,65,85,10,30,0,Alter_Accuracy,-1,N,S,Chance to lower the target's accuracy.,-,,,
+155,Iron Defense,Steel,Effect,0,101,15,101,0,Alter_Physical_Defense_User,2,N,U,Sharply raises the user's defense.,R,,,
+156,Shift Gear,Steel,Effect,0,101,10,101,0,Shift_Gear,1,N,U,"Raises the user's attack, and sharply raises the user's speed.",-,,,
+157,Moonblast,Fairy,Special,95,100,15,30,0,Alter_Special_Attack,-1,N,S,Chance to lower the target's special attack.,M,,,
+158,Play Rough,Fairy,Physical,90,90,10,10,0,Alter_Physical_Attack,-1,N,S,Chance to lower the target's attack.,M,,,
+159,Fairy Wind,Fairy,Physical,40,100,30,30,0,None,0,N,S,,-,,,
+160,Struggle,Typeless,Physical,50,101,0,0,0,Recoil,0,N,S,Only usable when all PP are gone. Hurts the user.,-,,,
