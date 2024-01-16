@@ -66,7 +66,8 @@ class Team:
             self.get_active_member().reset_boosts()
             self.active_member_index = index
         else:
-            print(self.name, " switch_active_member error: invalid switch index: " , index)
+            #print(self.name, "switch_active_member error: invalid switch index:" , index)
+            pass
 
     def get_number_of_members_to_switch_to(self):
         return self.team_members_healthy - 1

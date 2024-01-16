@@ -212,39 +212,14 @@ class GameState():
         self.policy_rating = self.calculate_policy_rating()
     
     def __str__(self) -> str:
-        return f"Player team: {self.player_team}\nAI team: {self.ai_team}\nTurn count: {self.turn_count}\nLast move: {self.last_move}\nGame over: {self.game_over}\nWinner: {self.winner}\nPolicy rating: {self.policy_rating}"
+        return f"Player team: {self.player_team}\nAI team: {self.ai_team}\nTurn count: {self.turn_count}\nLast move: {self.last_move}\nGame over: {self.did_elimination_occur()}\nWinner: {self.winner}\nPolicy rating: {self.policy_rating}\nAmount of ai possible actions: {len(self.get_ai_possible_actions(debug=True))}\n"
 
     def calculate_policy_rating(self):
         policy_rating = 0
-        '''if self.player_needs_to_switch: # If a player monster has fainted, increase policy_rating by 1
-            policy_rating += 1
-        if self.ai_needs_to_switch: # If an ai monster is fainted, decrease policy_rating by 1
-            policy_rating -= 1
-        if self.last_turn_summary: # Increase policy rating depending on the amount of damage dealt to the active player monster. Prevents throwing in unwinnable situations
-            for action in self.last_turn_summary:
-                if action.was_ai_action:
-                    policy_rating += action.damage_dealt / self.player_team.get_active_member().get_stat(MAX_HP)
-                elif not action.was_ai_action:
-                    policy_rating -= action.damage_dealt / self.ai_team.get_active_member().get_stat(MAX_HP)'''
-
-        '''if self.last_turn_summary: # If a turn was run, calculate the matchup strength of the active monsters, add that to policy rating
-            for action in self.last_turn_summary:
-                if action.was_ai_action:
-                    if action.user_attacked_and_did_no_damage():
-                        policy_rating -= 1
-                    if action.input_number == get_strongest_move_against(self.ai_team, self.player_team):
-                        policy_rating += 1'''
-
         if self.did_elimination_occur() and self.did_ai_win_a_matchup(): # If the node is a victory for the AI, policy rating is 100
             policy_rating = 100
         elif self.did_elimination_occur() and not self.did_ai_win_a_matchup(): # If the node is a victory for the player, policy rating is -100
             policy_rating = -100
-        
-        '''if self.game_over and self.did_ai_win(): # If the node is a victory for the AI, policy rating is 100
-            policy_rating = 100
-        elif self.game_over and not self.did_ai_win(): # If the node is a victory for the player, policy rating is -100
-            policy_rating = -100'''
-
         return policy_rating 
     
     def did_elimination_occur(self):
@@ -254,13 +229,14 @@ class GameState():
             # If the action was an opponent switching in after fainting, return true
             if action.target_fainted:
                 return True
+            return False
     
     def did_ai_win_a_matchup(self):
         if not self.last_turn_summary:
             return False
         else:
-            for action in self.last_turn_summary:
-                if action.was_ai_action and action.target_fainted: # Potential bug with precedence checking.
+            for action in self.last_turn_summary: # FIXME: This is not working for some reason. Possible bug with TurnActionSummary object
+                if action.was_ai_action and action.target_fainted: 
                     return True 
                 elif not action.was_ai_action and action.target_fainted:
                     return False
@@ -291,18 +267,37 @@ class GameState():
         loss_polish += 1 *  (1 - (self.player_team.get_active_member().get_stat(HP) / self.player_team.get_active_member().get_stat(MAX_HP)))
         return loss_polish
     
-    def get_ai_possible_actions(self):
+    def get_valid_switches_for_team(self, team: Team):
+        list_of_ai_choices = []
+        valid_switch_indices = team.get_list_of_valid_switch_indices()
+        for i in valid_switch_indices:
+            append_state = GameState(self.player_team.deep_copy(), self.ai_team.deep_copy(), self.turn_count).advance_game(i + 4) # 
+            list_of_ai_choices.append(append_state)
+        print("Valid team switch indices: " + str(valid_switch_indices))
+        return list_of_ai_choices
+
+    def get_ai_possible_actions(self, debug = False):
         if self.ai_needs_to_switch: # If ai needs to switch, return list of inputs representing every valid switch the AI can perform
+            #return self.get_valid_switches_for_team(self.ai_team)
             list_of_ai_choices = []
             valid_switch_indices = self.ai_team.get_list_of_valid_switch_indices()
+            if debug:
+                print("Valid ai switch indices: " + str(valid_switch_indices))
+                if len(valid_switch_indices) == 0:
+                    print("WARNING: No valid switches found for AI. ")
             for i in valid_switch_indices:
                 append_state = GameState(self.player_team.deep_copy(), self.ai_team.deep_copy(), self.turn_count).advance_game(i + 4) # 
                 list_of_ai_choices.append(append_state)
             return list_of_ai_choices
         
         elif self.player_needs_to_switch: # Switch Player monster, then return new state in the list
+            #return self.get_valid_switches_for_team(self.player_team)
             list_of_ai_choices = []
             valid_switch_indices = self.player_team.get_list_of_valid_switch_indices()
+            if debug:
+                print("Valid player switch indices: " + str(valid_switch_indices))
+                if len(valid_switch_indices) == 0:
+                    print("WARNING: No valid switches found for player. ")
             for i in valid_switch_indices:
                 append_state = GameState(self.player_team.deep_copy(), self.ai_team.deep_copy(), self.turn_count).advance_game(0, i + 4) # 0, 1, 2, 3, are move choices
                 list_of_ai_choices.append(append_state)
@@ -322,14 +317,21 @@ class GameState():
             #player_moves_list = self.player_team.get_member(self.player_team.active_member_index).get_list_of_valid_attack_move_numbers()
             #if len(player_moves_list) == 0:
             player_moves_list = self.player_team.get_member(self.player_team.active_member_index).get_list_of_valid_move_numbers()
+            if debug:
+                print("AI moves: " + str(ai_moves_list))
+                print("AI switches: " + str(ai_switches))
+                print("Player moves: " + str(player_moves_list))
             for i in ai_combination_list: # Get all 2-16 combinations of moves
                 for j in player_moves_list:
                     # Check if the move combination is valid (Neither move has 0 pp)
                     append_state = GameState(self.player_team.deep_copy(), self.ai_team.deep_copy(), self.turn_count).advance_game(i, j) # 0, 1, 2, 3, are move choices
                     list_of_ai_choices.append(append_state)
             # FIXME: Implement voluntary switching (switching to a better matchup)
+            if len(list_of_ai_choices) == 0:
+                print("WARNING: No valid moves found for AI. ")
             return list_of_ai_choices
-   
+
+    
     def advance_game(self, ai_choice, player_choice = 0): # Simulates moving game forward. Will flip switch booleans and if both are False, will run turn
         if self.ai_needs_to_switch  and not self.did_elimination_occur(): # If ai needs to switch, change the active monster according to the ai_choice
             self.ai_team.switch_active_member(ai_choice - 4) 
@@ -462,15 +464,22 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                             recoil_result = self.recoil(result)
                             if self.visualization:
                                 print(self.user_team.name + "'s " + self.user.name + " took " + str(recoil_result) + " damage from recoil!")
+                        elif self.move_used.effect == "Heal_Damage":
+                            heal_percentage = self.move_used.effect_magnitude
+                            self.heal_by_amount(damage_dealt=result, heal_percentage=heal_percentage)
+                            self.heal_by_percentage(heal_percentage)
+                        #elif "Alter" in self.move_used.effect:
+                        #    self.alter_boost()
                     self.expend_pp()
                 else:
                     if self.move_used.effect == "Synthesis_Heal":
                         self.synthesis_heal()
                     elif self.move_used.effect == "Heal_User":
                         heal_percentage = self.move_used.effect_magnitude
-                        self.heal(heal_percentage)
+                        self.heal_by_percentage(heal_percentage)
 
                     elif "Alter" in self.move_used.effect: # FIXME: Theres probably a better way to do this
+                        #self.alter_boost()
                         if "User" in self.move_used.effect: # If 'User' is in the effect string, set a variable to the user
                             move_target = self.user
                         else: # If not, set a variable ot the target
@@ -582,6 +591,85 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                 print("Switching error")
         return self.turn_action_summary
     
+    def alter_boost(self):
+        if "User" in self.move_used.effect: # If 'User' is in the effect string, set a variable to the user
+            move_target = self.user
+        else: # If not, set a variable ot the target
+            move_target = self.target
+        # Then figure out what stats are being altered (Create a list object to store all of the stats being altered)
+        alter_list = []
+        if "Physical_Attack" in self.move_used.effect:
+            alter_list.append(ATTACK)
+        if "Special_Attack" in self.move_used.effect:
+            alter_list.append(SP_ATTACK)
+        if "Physical_Defense" in self.move_used.effect:
+            alter_list.append(DEFENSE)
+        if "Special_Defense" in self.move_used.effect:
+            alter_list.append(SP_DEFENSE)
+        if "Speed" in self.move_used.effect:
+            alter_list.append(SPEED)
+        if "Accuracy" in self.move_used.effect:
+            alter_list.append(ACCURACY)
+        if "Evasion" in self.move_used.effect:
+            alter_list.append(EVASION)
+        alter_magnitude = self.move_used.effect_magnitude
+        for stat in alter_list:
+            if stat == ATTACK:
+                stat_name = "Attack"
+            elif stat == SP_ATTACK:
+                stat_name = "Special Attack"
+            elif stat == DEFENSE:
+                stat_name = "Defense"
+            elif stat == SP_DEFENSE:
+                stat_name = "Special Defense"
+            elif stat == SPEED:
+                stat_name = "Speed"
+            elif stat == ACCURACY:
+                stat_name = "Accuracy"
+            elif stat == EVASION:
+                stat_name = "Evasion"
+            else:
+                stat_name = "Error"
+            curr_boost = move_target.get_boost_for_stat(stat)
+            if alter_magnitude < 0:
+                if curr_boost + alter_magnitude < -6:
+                    raised_amount = -6 - curr_boost
+                else:
+                    raised_amount = alter_magnitude
+                move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
+                # Handle printing
+                if self.visualization:
+                    if raised_amount == -1:
+                        print(move_target.name + "'s " + stat_name + " fell!")
+                    elif raised_amount == -2:
+                        print(move_target.name + "'s " + stat_name + " harshly fell!")
+                    elif raised_amount < 0 :
+                        print(move_target.name + "'s " + stat_name + " fell by " + str(raised_amount) + " stages!")
+                    elif raised_amount == 0:
+                        print(move_target.name + "'s " + stat_name + " couldn't get any lower!")
+                    else:
+                        print("Alter_Attack_User error")
+            elif alter_magnitude > 0:
+                if curr_boost + alter_magnitude > 6:
+                    raised_amount = 6 - curr_boost
+                else:
+                    raised_amount = alter_magnitude
+                move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
+                # Handle printing
+                if self.visualization:
+                    if raised_amount == 1:
+                        print(move_target.name + "'s " + stat_name + " rose!")
+                    elif raised_amount == 2:
+                        print(move_target.name + "'s " + stat_name + " sharply rose!")
+                    elif raised_amount > 0:
+                        print(move_target.name + "'s " + stat_name + " rose by " + str(raised_amount) + " stages!")
+                    elif raised_amount == 0:
+                        print(move_target.name + "'s " + stat_name + " couldn't get any higher!")
+                    else:
+                        print("Alter_Attack_User error")
+            else:
+                print("Warning: Alter effect magnitude is 0")
+
     def recoil(self, damage_dealt):
         damage = math.floor(damage_dealt / 3)
         self.user.HP -= damage
@@ -632,8 +720,19 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         if overheal_amount > 0:
             self.user.HP = self.user.max_HP
 
-    def heal(self,percentage):
+    def heal_by_percentage(self,percentage):
         heal_amount = math.floor(self.user.max_HP * (percentage / 100))
+        overheal_amount = heal_amount + self.user.HP - self.user.max_HP
+        if overheal_amount < 0:
+            overheal_amount = 0
+        if self.visualization:
+            print(self.user.name + " healed " + str(heal_amount - overheal_amount) + " HP!")
+        self.user.HP += heal_amount
+        if overheal_amount > 0:
+            self.user.HP = self.user.max_HP
+
+    def heal_by_amount(self, damage_dealt, heal_percentage):
+        heal_amount = math.floor(damage_dealt * (heal_percentage / 100))
         overheal_amount = heal_amount + self.user.HP - self.user.max_HP
         if overheal_amount < 0:
             overheal_amount = 0

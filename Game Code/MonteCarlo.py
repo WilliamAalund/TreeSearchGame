@@ -11,7 +11,7 @@ search_depth = 15 # Depth of the search tree. Higher value means more accurate r
 # --- MONTE CARLO TREE SEARCH CLASS ---
 class MonteCarloTreeSearch:
     def __init__(self, game_state, verbose = False, random_policy = True):
-        self.root = Node(game_state)
+        self.root = Node(game_state, verbose=verbose)
         self.verbose = verbose
         self.random_policy = random_policy
     
@@ -22,8 +22,8 @@ class MonteCarloTreeSearch:
                 print(".", end="")
             leaf = self.traverse_tree(self.root) # Selection. leaf equals a node that does not have children, and conforms to the rollout policy. (Rollout policy detailed in node class)
             result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Choice of nodes is based on the rollout policy.
-            if self.verbose:
-                print("Result of rollout: " + str(result))
+            #if self.verbose:
+            #    print("Result of rollout: " + str(result))
             self.backpropagate_tree(leaf, result) # Backpropagation. Updates the stats of the nodes from the leaf to the root.
             i += 1
         if self.verbose:
@@ -71,7 +71,7 @@ class MonteCarloTreeSearch:
 #
 # --- NODE CLASS ---
 class Node: # Class designed in a game state agnostic way
-    def __init__(self, game_state, parent = None):
+    def __init__(self, game_state, parent = None, verbose = False):
         self.children = []
         self.state = game_state
         self.ucb = float('inf') # If a node hasn't been explored yet, we want to explore it first. This value is set to 999 so that it will be explored first.
@@ -80,10 +80,13 @@ class Node: # Class designed in a game state agnostic way
         self.node_expanded = False
         self.parent = parent
         self.is_terminal = self.state.did_elimination_occur()
+        self.verbose = verbose
         #self.is_terminal = self.state.is_game_over()
         #self.is_terminal = self.state.did_ai_get_an_elimination() or self.state.did_player_get_an_elimination() # FIXME: Will encourage AI to use a move like explosion if it is the only way to win. Should be changed to is_game_over() when that is implemented.
         # TODO: Integrate both forms of MTCS into node: one that simulates the whole game, and one that simulates until an elimination is achieved.
 
+    def __str__(self):
+        return str(self.state)
 
     def node_is_expanded(self):
         return self.node_expanded
@@ -92,6 +95,9 @@ class Node: # Class designed in a game state agnostic way
         return self.parent is None
     
     def node_is_terminal(self):
+        if self.verbose:
+            print("node_is_terminal called")
+            print("Is terminal: " + str(self.is_terminal) + ", turn count: " + str(self.state.turn_count) + ", search depth: " + str(search_depth))
         return self.is_terminal or self.state.turn_count > search_depth
 
     def is_game_won(self): # TODO: Integrate both forms of MTCS into node: one that simulates the whole game, and one that simulates until an elimination is achieved.
@@ -112,7 +118,7 @@ class Node: # Class designed in a game state agnostic way
         if self.node_is_terminal():
             print("I am a terminal node that is being expanded")
         for state in self.state.get_ai_possible_actions():
-            self.children.append(Node(state,self))
+            self.children.append(Node(state,self, verbose=self.verbose))
         self.node_expanded = True
     
     def result(self): # Returns if the AI won or lost on a terminal node. Game agnostic. Called in MonteCarloTreeSearch class
@@ -121,6 +127,12 @@ class Node: # Class designed in a game state agnostic way
     def rollout_policy(self, random_policy = True):
         if not self.node_expanded and not self.node_is_terminal():
             self.expand() # Flips node_expanded to True
+            if self.verbose:
+                self.print_children()
+            if len(self.children) == 0:
+                if self.verbose:
+                    print("No children, but node is not terminal, and rollout policy is being called.")
+                    print(self)
         else:
             return
         if random_policy:
@@ -167,5 +179,7 @@ class Node: # Class designed in a game state agnostic way
             self.ucb += exploration_parameter * sqrt(log(parent_visits) / self.visits)
     
     def print_children(self):
+        child_num = 0
         for child in self.children:
-            print("Child: " + str(child.state.state_value) + " with ucb value of: " + str(child.ucb) + " and visits of: " + str(child.visits))
+            print("Child: " + str(child_num) + "\n" + str(self.state) + " with ucb value of: " + str(child.ucb) + " and visits of: " + str(child.visits))
+            child_num += 1

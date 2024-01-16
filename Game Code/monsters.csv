@@ -595,7 +595,7 @@ NUMBER,CODE,SERIAL,NAME,TYPE1,TYPE2,COLOR,ABILITY1,ABILITY2,ABILITY HIDDEN,GENER
 497,1,4971,Serperior,Grass,,Green,Overgrow,,Contrary,5,0,0,3.3,63,75,75,95,75,95,113,528,,,"54,51,12,52",,80,,,,,
 498,1,4981,Tepig,Fire,,Red,Blaze,,Thick Fat,5,0,0,0.5,9.9,65,63,45,45,45,45,308,n,,"1,10,16",,,,,,,
 499,1,4991,Pignite,Fire,Fighting,Red,Blaze,,Thick Fat,5,0,0,1,55.5,90,93,55,70,55,55,418,n,,"69,18,10,87",,17,,,,,
-500,1,5001,Emboar,Fire,Fighting,Red,Blaze,,Reckless,5,0,0,1.6,150,110,123,65,100,65,65,528,,,"22,23,127,73",,74,,,,,
+500,1,5001,Emboar,Fire,Fighting,Red,Blaze,,Reckless,5,0,0,1.6,150,110,123,65,100,65,65,528,,,"22,23,1,73",127,74,,,,,
 501,1,5011,Oshawott,Water,,Blue,Torrent,,Shell Armor,5,0,0,0.5,5.9,55,55,45,63,45,45,308,n,,"1,11,29",,,13,,,,
 502,1,5021,Dewott,Water,,Blue,Torrent,,Shell Armor,5,0,0,0.8,24.5,75,75,60,83,60,60,413,n,l,"34,35,36,116",,34,13,,,,
 503,1,5031,Samurott,Water,,Blue,Torrent,,Shell Armor,5,0,0,1.5,94.6,95,100,85,108,70,70,528,,,"33,64,116,13",,29,13,,,,

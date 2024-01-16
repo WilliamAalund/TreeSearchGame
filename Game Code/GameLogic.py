@@ -41,6 +41,7 @@ def starter_game(random_ai = False):
     player_team.add_member(Monster(SAMUROTT, 15))
     player_team.add_member(Monster(SERPERIOR, 15))
     player_team.add_member(Monster(EMBOAR, 15))
+    player_team.add_member(Monster(EMBOAR, 15))
     ai_team.add_member(Monster(SAMUROTT, 15))
     ai_team.add_member(Monster(SERPERIOR, 15))
     ai_team.add_member(Monster(EMBOAR, 15))
@@ -57,9 +58,25 @@ def easy_game(random_ai = False):
     player_team.add_member(Monster(495, 15))
     ai_team.add_member(Monster(501, 15))
     match_result = match(player_team, ai_team, random_ai=random_ai)
-    if match_result:
-        print("Player won")
     
+def recoil_game(random_ai = False):
+    # Match between two teams with one emboar
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(EMBOAR, 15))
+    ai_team.add_member(Monster(EMBOAR, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
+
+def error_game(random_ai = False):
+    # Match between two teams of one snivy
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(SNIVY, 15))
+    ai_team.add_member(Monster(SNIVY, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
+
+
+
 def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=False): # Runs a match between two teams. Returns 1 if player won, 0 if AI won
     player_team.active_member_index = 0
     ai_team.active_member_index = 0
@@ -92,7 +109,7 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
             else:
                 current_game_state = GameState(player_team, ai_team)
                 print("AI is thinking...", end="")
-                ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=False).get_best_move()
+                ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=False, verbose=False).get_best_move()
             turn(player_team, uinp, ai_team, ai_choice)
     # Match over
     if player_team.has_non_fainted_members():
@@ -100,4 +117,5 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
     else:
         print("AI wins")
         return 0
-easy_game()
+
+error_game(random_ai=False)
