@@ -1,14 +1,14 @@
 MAX_TEAM_SIZE = 6
 
 class Team:
-    def __init__(self, name="Team") -> None:
+    def __init__(self, name="Team", level=1, wild = False) -> None:
         self.name = name
         self.team_members = []
         self.team_size = 0
-        self.team_level = 1
+        self.team_level = level
         self.team_members_healthy = 0
         self.active_member_index = 0
-
+        self.wild = wild
 
     def __str__(self) -> str:
         team_members_names = [str(member.name) for member in self.team_members]
@@ -101,6 +101,10 @@ class Team:
     def is_active_member_fainted(self):
         return self.team_members[self.active_member_index].fainted
     
+    def fully_heal_team(self):
+        for monster in self.team_members:
+            monster.fully_heal()
+
     def deep_copy(self):
         new_team = Team()
         new_team.name = self.name

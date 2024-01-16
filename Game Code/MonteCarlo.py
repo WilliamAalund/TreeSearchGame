@@ -4,8 +4,8 @@ import random as rng
 from MatchClasses import GameState # Dependency for Node class
 
 # --- GLOBAL VARIABLES ---
-exploration_parameter = 1.5 # Exploration parameter for UCB formula. Higher value means more exploration. 
-ai_intelligence = 2500 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
+exploration_parameter = 1.4 # Exploration parameter for UCB formula. Higher value means more exploration. 
+ai_intelligence = 3000 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
 search_depth = 15 # Depth of the search tree. Higher value means more accurate results, but more time taken.
 
 # --- MONTE CARLO TREE SEARCH CLASS ---
@@ -18,7 +18,7 @@ class MonteCarloTreeSearch:
     def get_best_move(self):
         i = 0
         while i < ai_intelligence:
-            if i % 100 == 0:
+            if i % 200 == 0:
                 print(".", end="")
             leaf = self.traverse_tree(self.root) # Selection. leaf equals a node that does not have children, and conforms to the rollout policy. (Rollout policy detailed in node class)
             result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Choice of nodes is based on the rollout policy.
@@ -27,9 +27,14 @@ class MonteCarloTreeSearch:
             self.backpropagate_tree(leaf, result) # Backpropagation. Updates the stats of the nodes from the leaf to the root.
             i += 1
         if self.verbose:
-            print("Best move is: " + str(self.root.best_child().state.last_move) + " with a ucb value of: " + str(self.root.best_child().ucb))
+            pass
+        for child in self.root.children:
+                print("Child name: " + str(child.state.last_move) + ", UCB value: " + str(child.ucb))
+        #print("Best move is: " + str(self.root.best_child().state.last_move) + " with a ucb value of: " + str(self.root.best_child().ucb))
         print()
-        return self.root.best_child().state.last_move
+        #return self.root.best_child().state.last_move
+        #print("Best move is: " + str(self.root.best_child_last_move()))
+        return self.root.best_child_last_move()
     
     def traverse_tree(self, node): # Modified traversal function. Evenly spreads traversals between nodes with high ucb values and nodes with low visits. Game agnostic.
         while node.node_is_expanded():
@@ -43,7 +48,7 @@ class MonteCarloTreeSearch:
         while not node.node_is_terminal():
             node = node.rollout_policy(random_policy=self.random_policy)
         if node.is_game_won(): # Not game agnostic, score returned is based on number of turns taken to win
-            return 1 + node.state.get_outcome_reward()
+            return 1 + node.state.get_victory_reward()
             '''num_turns = node.state.turn_count
             if num_turns == 0:
                 return 1
@@ -55,7 +60,7 @@ class MonteCarloTreeSearch:
                 return 3
             return 1 / num_turns'''
         else:
-            return 0
+            return 0 + node.state.get_loss_reward()
 
     def backpropagate_tree(self, node, result):
         node.update_stats(result)
@@ -91,7 +96,8 @@ class Node: # Class designed in a game state agnostic way
 
     def is_game_won(self): # TODO: Integrate both forms of MTCS into node: one that simulates the whole game, and one that simulates until an elimination is achieved.
         #return self.state.did_ai_win()
-        return self.state.did_ai_win_a_matchup()
+        return self.state.was_matchup_won()
+        #return self.state.did_elimination_occur() and self.state.did_ai_win_a_matchup()
     
     def node_get_parent(self):
         if self.node_is_root():
@@ -126,6 +132,15 @@ class Node: # Class designed in a game state agnostic way
     def best_child(self):
         return max(self.children, key=lambda child: child.ucb)
     
+    def best_child_last_move(self):
+        child_names = {}  # Dictionary to store unique child names and their corresponding ucb values
+        for child in self.children:
+            if child.state.last_move not in child_names:
+                child_names[child.state.last_move] = child.ucb
+            else:
+                child_names[child.state.last_move] += child.ucb
+        return max(child_names, key=child_names.get)
+
     def node_get_parent_visits(self):
         return self.parent.visits
 

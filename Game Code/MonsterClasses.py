@@ -16,9 +16,15 @@ SP_DEFENSE = 3
 SPEED = 4
 HP = 5
 MAX_HP = 6
+ACCURACY = 7
+EVASION = 8
 
 UNOVA_LOWER_BOUND = 494
 UNOVA_UPPER_BOUND = 649
+
+STARTER_1 = 495
+STARTER_2 = 498
+STARTER_3 = 501
 
 NATURE_DICT = {'Hardy': (ATTACK, ATTACK), 'Lonely': (ATTACK, DEFENSE), 'Adamant': (ATTACK, SP_ATTACK), 'Naughty': (ATTACK, SP_DEFENSE), 'Brave': (ATTACK, SPEED),
               'Bold': (DEFENSE, ATTACK), 'Docile': (DEFENSE, DEFENSE), 'Impish': (DEFENSE, SP_ATTACK), 'Lax': (ATTACK, SP_DEFENSE), 'Relaxed': (DEFENSE, SPEED),
@@ -237,7 +243,26 @@ class Monster: #TODO: set up move database for each monster
         self.evasion_boost = 0
         self.crit_chance = 0
 
-    def get_multiplier_for_stat(self, stat):
+    def get_boost_for_stat(self, stat):
+        if stat == ATTACK:
+            return self.attack_boost
+        elif stat == DEFENSE:
+            return self.defense_boost
+        elif stat == SP_ATTACK:
+            return self.special_attack_boost
+        elif stat == SP_DEFENSE:
+            return self.special_defense_boost
+        elif stat == SPEED:
+            return self.speed_boost
+        elif stat == ACCURACY:
+            return self.accuracy_boost
+        elif stat == EVASION:
+            return self.evasion_boost
+        else:
+            print("Invalid stat code")
+            return 0
+
+    def get_multiplier_for_stat(self, stat): # Returns the multiplier that a stat receives from a particular boost level
         if stat == ATTACK:
             curr_boost = self.attack_boost
         elif stat == DEFENSE:
@@ -274,6 +299,45 @@ class Monster: #TODO: set up move database for each monster
             return 0.25
         else:
             return 1
+
+    def set_boost_for_stat(self, stat, boost): # Sets the boost value for a particular stat
+        if stat == ATTACK:
+            self.attack_boost = boost
+        elif stat == DEFENSE:
+            self.defense_boost = boost
+        elif stat == SP_ATTACK:
+            self.special_attack_boost = boost
+        elif stat == SP_DEFENSE:
+            self.special_defense_boost = boost
+        elif stat == SPEED:
+            self.speed_boost = boost
+        elif stat == ACCURACY:
+            self.accuracy_boost = boost
+        elif stat == EVASION:
+            self.evasion_boost = boost
+        else:
+            print("Invalid stat code")
+            return 0
+
+    def get_list_of_valid_attack_move_numbers(self): # Returns a list of moves that are not effect moves
+        moves = []
+        if self.move_1:
+            if self.move_1.pp > 0 and self.move_1.category == 'Physical' or self.move_1.category == 'Special': 
+                moves.append(MOVE_1)
+        if self.move_2:
+            if self.move_2.pp > 0 and self.move_2.category == 'Physical' or self.move_2.category == 'Special':
+                moves.append(MOVE_2)
+        if self.move_3:
+            if self.move_3.pp > 0 and self.move_3.category == 'Physical' or self.move_3.category == 'Special':
+                moves.append(MOVE_3)
+        if self.move_4:
+            if self.move_4.pp > 0 and self.move_4.category == 'Physical' or self.move_4.category == 'Special':
+                moves.append(MOVE_4)
+        if moves:
+            return moves
+        else:
+            moves.append(STRUGGLE)
+            return moves
 
 
     def get_list_of_valid_move_numbers(self): # Used in getting a list of valid moves to choose from in MatchClasses.py
@@ -450,6 +514,21 @@ class Monster: #TODO: set up move database for each monster
             # Reset exp to 0
             # Calculate exp to next level, assign it to a parameter
 
+    def fully_heal(self): # Fully heals the monster
+        self.HP = self.max_HP
+        if self.move_1:
+            self.move_1.pp = self.move_1.max_pp
+        if self.move_2:
+            self.move_2.pp = self.move_2.max_pp
+        if self.move_3:
+            self.move_3.pp = self.move_3.max_pp
+        if self.move_4:
+            self.move_4.pp = self.move_4.max_pp
+        self.status = None
+        self.reset_boosts()
+        self.fainted = False
+        self.not_fainted = True
+        
     def deep_copy(self): # Returns a deep copy of the monster, used in Monte Carlo Tree Search
         new_monster = Monster(deep_copy=self)
         return new_monster
@@ -469,6 +548,11 @@ def generated_monster(id = 0, level_parameter = 1): #TODO: Implement monster gen
     # Return the monster
     return monster
 
+
+
+
+
 if __name__ == "__main__":
-    TestMonster = Monster(495, 50)
-    print(TestMonster)
+    TestMonster = Monster(501, 50)
+    TestMonster2 = Monster(501, 50)
+    print(TestMonster.get_strongest_move_against(TestMonster2))

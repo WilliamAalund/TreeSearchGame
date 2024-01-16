@@ -1,3 +1,6 @@
+from MonsterClasses import HP, MAX_HP
+
+ 
 game_on_calculator = False
 force_game_in_terminal = True # Will force the game to run in terminal even if on calculator
 
@@ -75,7 +78,6 @@ def generic_input(input_message = "Enter input { ", action_1 = "continue", actio
         elif uinp == "m" and action_7_available:
             return 6
 
-
 def switch_menu(input_message = "Choose a Pokemon.", team_members=[], valid_switch_indices=[], Back = True):
     uinp = -1
     if Back:
@@ -149,6 +151,25 @@ def battle_menu_input(active_member_moves, team_members, valid_switch_indices = 
                 in_menu = False
         print()
         return uinp
+
+def battle_scene(player_team, ai_team):
+    print("You: ", end="")
+    print("Lv." + str(player_team.get_member(player_team.active_member_index).level) + " ", end="")
+    print(player_team.get_member(player_team.active_member_index).name, end="")
+    print(" " + player_team.get_member(player_team.active_member_index).status if player_team.get_member(player_team.active_member_index).status else "", end="")
+    print(" " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="") 
+    print(" | Opponent: ", end="")
+    print("Lv." + str(ai_team.get_member(ai_team.active_member_index).level) + " ", end="")
+    print(ai_team.get_member(ai_team.active_member_index).name, end=" ")
+    ai_hp_percentage = round((ai_team.get_member(ai_team.active_member_index).get_stat(HP) / ai_team.get_active_member().get_stat(MAX_HP)) * 100, 1)
+    print(ai_hp_percentage,"%")
+
+def starter_menu(name1, name2, name3):
+    if using_calculator_menus():
+        return input()
+    else: # Case where not on calculator, or force_game_in_terminal is True
+        starter_choice = generic_input("Choose your starter.", "Snivy", "Tepig", "Oshawott")
+        return starter_choice
 
 
 #switch_menu("yyyy",["Charmander", "Squirtle", "Bulbasaur"], [0, 1, 2])

@@ -1,7 +1,7 @@
 import random as rng
-from GameMenus import *
+import GameMenus as gm
 from MoveClasses import Move
-from MonsterClass import * # Monster class, constants, nature dictionary
+from MonsterClasses import * # Monster class, constants, nature dictionary
 from TeamClass import Team
 import math
 
@@ -45,7 +45,7 @@ TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1
               'Fairy':{'Normal':1, 'Fire':0.5, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':2, 'Poison':0.5, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':2, 'Dark':2, 'Steel':0.5, 'Fairy':1, 'Typeless':1},
               'Typeless':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':1, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1}}
 
-def damage_calc(user, target, move: Move, user_team, target_team, can_crit = True, visualization = True, is_struggle = False, crit_chance = DEFAULT_CRIT_CHANCE):
+def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_team, can_crit = True, visualization = True, is_struggle = False, crit_chance = DEFAULT_CRIT_CHANCE):
     if can_crit:
         roll = rng.randint(1,100)
         #if visualization:
@@ -106,7 +106,88 @@ def damage_calc(user, target, move: Move, user_team, target_team, can_crit = Tru
         return 0    
     raw_calc = ((((2*user.level / 5 + 2) * move.base_power * (used_attack / used_defense)) / 50) + 2)
     multiplier_calc = (raw_calc * crit_mult * stab_mult * type_mult * used_attack_multiplier) / used_defense_multiplier
+    if visualization:
+        target_hp_max = target.get_stat(MAX_HP)
+        print(f"- {(multiplier_calc / target_hp_max) * 100:.1f} %")
+        print("Raw calc (" + str(raw_calc) + ") * Crit (" + str(crit_mult) + ") * Stab (" + str(stab_mult) + ") Type (" + str(type_mult) + ") * Attack mult (" + str(used_attack_multiplier) + ") * Defense mult (" + str(used_defense_multiplier) + ") = " + str(multiplier_calc))
     return math.ceil(multiplier_calc)
+
+def get_strongest_move_against(user_team: Team, target_team: Team): # Returns the strongest move against the enemy monster
+        # For each move in the monster's moveset, calculate the damage it would do to the enemy monster
+        user = user_team.get_active_member()
+        target = target_team.get_active_member()
+        move_damages = [-1,-1,-1,-1]
+        if user.move_1:
+            if user.move_1.pp > 0:
+                move_1_damage = damage_calc(user, target, user.move_1, user_team, target_team, visualization=False)
+                move_damages[0] = move_1_damage
+        if user.move_2:
+            if user.move_2.pp > 0:
+                move_2_damage = damage_calc(user, target, user.move_2, user_team, target_team, visualization=False)
+                move_damages[1] = move_2_damage
+        if user.move_3:
+            if user.move_3.pp > 0:
+                move_3_damage = damage_calc(user, target, user.move_3, user_team, target_team, visualization=False)
+                move_damages[2] = move_3_damage
+        if user.move_4:
+            if user.move_4.pp > 0:
+                move_4_damage = damage_calc(user, target, user.move_4, user_team, target_team, visualization=False)
+                move_damages[3] = move_4_damage
+        if max(move_damages) == -1:
+            return STRUGGLE
+        else:
+            return move_damages.index(max(move_damages)) # Return the move that does the most damage
+
+def does_first_team_win_matchup(user_team: Team, target_team: Team):
+    # Will quickly simulate a matchup between two monsters. Both monsters will use their strongest move every turn until one faints. Returns True if user_team wins, False if target_team wins
+    # Get references to the two monsters
+    user = user_team.get_active_member()
+    target = target_team.get_active_member()
+    # Get strongest move from both monsters
+    user_strongest_move = get_strongest_move_against(user_team, target_team)
+    target_strongest_move = get_strongest_move_against(target_team, user_team) 
+    # Simulate turns until one faints
+    user_damage = damage_calc(user, target, user.get_move(user_strongest_move), user_team, target_team,can_crit=False, visualization=False)
+    target_damage = damage_calc(target, user, target.get_move(target_strongest_move), target_team, user_team,can_crit=False, visualization=False)
+    
+    user_speed = user.get_stat(SPEED)
+    target_speed = target.get_stat(SPEED)
+
+    user_remaining_hp = user.get_stat(HP)
+    target_remaining_hp = target.get_stat(HP)
+
+    while user_remaining_hp > 0 and target_remaining_hp > 0:
+        if user_speed > target_speed:
+            target_remaining_hp -= user_damage
+            if target_remaining_hp > 0:
+                user_remaining_hp -= target_damage
+        elif target_speed > user_speed:
+            user_remaining_hp -= target_damage
+            if user_remaining_hp > 0:
+                target_remaining_hp -= user_damage
+        else:
+            if rng.randint(0,1) == 0:
+                target_remaining_hp -= user_damage
+                if target_remaining_hp > 0:
+                    user_remaining_hp -= target_damage
+            else:
+                user_remaining_hp -= target_damage
+                if user_remaining_hp > 0:
+                    target_remaining_hp -= user_damage
+    # Return True if user_team wins, False if target_team wins
+    if target_remaining_hp <= 0 and user_remaining_hp > 0:
+        return True
+    else:
+        return False
+    
+    '''while not user.fainted and not target.fainted:
+        turn(user_team, user_strongest_move, target_team, target_strongest_move, visualization=False, rng=False)
+    # Return True if user_team wins, False if target_team wins
+    if target.fainted and not user.fainted: # FIXME: Not implemented
+        return True
+    else:
+        return False'''
+
 
 class GameState():
     def __init__(self, player_team, ai_team, turn_count = 0, last_move = 0) -> None:
@@ -117,7 +198,6 @@ class GameState():
         self.ai_has_switched_after_fainting = False
         self.turn_count = turn_count
         self.last_move = last_move
-        self.game_over = self.is_game_over()
         self.winner = None
         self.last_turn_summary = None
         self.policy_rating = self.calculate_policy_rating()
@@ -127,7 +207,7 @@ class GameState():
 
     def calculate_policy_rating(self):
         policy_rating = 0
-        if self.player_needs_to_switch: # If a player monster has fainted, increase policy_rating by 1
+        '''if self.player_needs_to_switch: # If a player monster has fainted, increase policy_rating by 1
             policy_rating += 1
         if self.ai_needs_to_switch: # If an ai monster is fainted, decrease policy_rating by 1
             policy_rating -= 1
@@ -136,47 +216,35 @@ class GameState():
                 if action.was_ai_action:
                     policy_rating += action.damage_dealt / self.player_team.get_active_member().get_stat(MAX_HP)
                 elif not action.was_ai_action:
-                    policy_rating -= action.damage_dealt / self.ai_team.get_active_member().get_stat(MAX_HP)
-         
-            
+                    policy_rating -= action.damage_dealt / self.ai_team.get_active_member().get_stat(MAX_HP)'''
 
-        if self.last_turn_summary: # If a turn was run, calculate the matchup strength of the active monsters, add that to policy rating
+        '''if self.last_turn_summary: # If a turn was run, calculate the matchup strength of the active monsters, add that to policy rating
             for action in self.last_turn_summary:
-                if action.was_ai_action and action.user_attacked_and_did_no_damage():
-                    policy_rating -= 1
+                if action.was_ai_action:
+                    if action.user_attacked_and_did_no_damage():
+                        policy_rating -= 1
+                    if action.input_number == get_strongest_move_against(self.ai_team, self.player_team):
+                        policy_rating += 1'''
 
-        if self.game_over and self.did_ai_win(): # If the node is a victory for the AI, policy rating is 100
+        if self.did_elimination_occur() and self.did_ai_win_a_matchup(): # If the node is a victory for the AI, policy rating is 100
+            policy_rating = 100
+        elif self.did_elimination_occur() and not self.did_ai_win_a_matchup(): # If the node is a victory for the player, policy rating is -100
+            policy_rating = -100
+        
+        '''if self.game_over and self.did_ai_win(): # If the node is a victory for the AI, policy rating is 100
             policy_rating = 100
         elif self.game_over and not self.did_ai_win(): # If the node is a victory for the player, policy rating is -100
-            policy_rating = -100
+            policy_rating = -100'''
 
         return policy_rating 
     
-    '''def get_outcome_dents(self): # Number that represents magnitude by which the AI's victory should be lowered.
-        victory_dent = 0
-        # FIXME: The more fainted members, the bigger the dent.
-        victory_dent += self.player_team.get_active_member().get_stat(HP) / self.player_team.get_active_member().get_stat(MAX_HP)
-        return victory_dent'''
-
-    def get_outcome_reward(self): # Number that represents magnitude by which the AI won.
-        victory_polish = 0
-        victory_polish += (self.ai_team.get_active_member().get_stat(HP) / self.ai_team.get_active_member().get_stat(MAX_HP)) * 2 # Reward AI for minimizing damage taken
-        victory_polish += (1 - (self.player_team.get_active_member().get_stat(HP) / self.player_team.get_active_member().get_stat(MAX_HP))) * 2 # Reward AI for maximizing damage dealt
-        victory_polish -= self.turn_count / 10
-        return victory_polish
-
-    def is_game_over(self):
-        if self.player_team.has_non_fainted_members() and self.ai_team.has_non_fainted_members():
+    def did_elimination_occur(self):
+        if not self.last_turn_summary:
             return False
-        else:
-            self.game_over = True
-            return True
-        
-    def did_elimination_occur_and_ai_caused_it(self): # May be a redundant function
-        if self.did_ai_win_a_matchup() and self.did_elimination_occur():
-            return True
-        else:
-            return False
+        for action in self.last_turn_summary:
+            # If the action was an opponent switching in after fainting, return true
+            if action.target_fainted:
+                return True
     
     def did_ai_win_a_matchup(self):
         if not self.last_turn_summary:
@@ -189,19 +257,30 @@ class GameState():
                     return False
             return False
     
-    def did_elimination_occur(self):
-        if not self.last_turn_summary:
-            return False
-        for action in self.last_turn_summary:
-            # If the action was an opponent switching in after fainting, return true
-            if action.target_fainted:
+    def was_matchup_won(self):
+        if self.did_elimination_occur():
+            if self.did_ai_win_a_matchup():
                 return True
-
-    def did_ai_win(self):
-        if self.is_game_over():
-            return self.ai_team.has_non_fainted_members()
+            else:
+                return False
         else:
             return False
+
+    def get_victory_reward(self): # Number that represents magnitude by which the AI won.
+        victory_polish = 0
+        for action in self.last_turn_summary:
+            if not action.was_ai_action and action.was_effect_move: # Invalidate victories where AI won because the player did not attack
+                victory_polish = -1
+                return victory_polish
+        # Reward for victories with more hp left
+        victory_polish += 1 * (self.ai_team.get_active_member().get_stat(HP) / self.ai_team.get_active_member().get_stat(MAX_HP))
+        victory_polish += 2 * (1 - (self.turn_count / 5))
+        return victory_polish
+    
+    def get_loss_reward(self):
+        loss_polish = 0
+        loss_polish += 1 *  (1 - (self.player_team.get_active_member().get_stat(HP) / self.player_team.get_active_member().get_stat(MAX_HP)))
+        return loss_polish
     
     def get_ai_possible_actions(self):
         if self.ai_needs_to_switch: # If ai needs to switch, return list of inputs representing every valid switch the AI can perform
@@ -231,6 +310,8 @@ class GameState():
             ai_moves_list = self.ai_team.get_member(self.ai_team.active_member_index).get_list_of_valid_move_numbers()
             ai_combination_list = ai_moves_list + ai_switches
             # Alter player_moves to be a list of valid moves
+            #player_moves_list = self.player_team.get_member(self.player_team.active_member_index).get_list_of_valid_attack_move_numbers()
+            #if len(player_moves_list) == 0:
             player_moves_list = self.player_team.get_member(self.player_team.active_member_index).get_list_of_valid_move_numbers()
             for i in ai_combination_list: # Get all 2-16 combinations of moves
                 for j in player_moves_list:
@@ -238,17 +319,15 @@ class GameState():
                     append_state = GameState(self.player_team.deep_copy(), self.ai_team.deep_copy(), self.turn_count).advance_game(i, j) # 0, 1, 2, 3, are move choices
                     list_of_ai_choices.append(append_state)
             # FIXME: Implement voluntary switching (switching to a better matchup)
-            #if len(list_of_ai_choices) > 9:
-            #    print(len(list_of_ai_choices))
             return list_of_ai_choices
    
     def advance_game(self, ai_choice, player_choice = 0): # Simulates moving game forward. Will flip switch booleans and if both are False, will run turn
-        if self.ai_needs_to_switch  and not self.is_game_over(): # If ai needs to switch, change the active monster according to the ai_choice
+        if self.ai_needs_to_switch  and not self.did_elimination_occur(): # If ai needs to switch, change the active monster according to the ai_choice
             self.ai_team.switch_active_member(ai_choice - 4) 
             self.ai_needs_to_switch = False
             self.last_turn_summary = [TurnActionSummary(was_ai_action=True,was_switch_after_faint=True)]
             self.ai_has_switched_after_fainting = True
-        elif self.player_needs_to_switch and not self.is_game_over(): # If player needs to switch, change the active monster according to the player_choice
+        elif self.player_needs_to_switch and not self.did_elimination_occur(): # If player needs to switch, change the active monster according to the player_choice
             if player_choice == self.player_team.team_size:
                 print("Player choice is out of range")
                 print("Debug variables: player_choice: " + str(player_choice) + " ai_choice: " + str(ai_choice))
@@ -259,7 +338,6 @@ class GameState():
             visualization = False
             self.last_turn_summary = turn(self.player_team, player_choice, self.ai_team, ai_choice, visualization, rng=False) # Teams passed by reference, will be altered by turn function
             self.update_team_needs_to_switch_booleans() # The line that saved the world
-            self.is_game_over()
             self.turn_count += 1 # If ran turn, increment turn counter and check if game is over
         self.last_move = ai_choice
         return self
@@ -336,7 +414,7 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         self.target_team = target_team
         self.priority = self.set_priority()
         self.visualization = visualization
-        self.turn_action_summary = TurnActionSummary(self.was_ai_action)
+        self.turn_action_summary = TurnActionSummary(self.was_ai_action,input_number=uinp)
         self.can_crit = can_crit
         if self.uinp > MOVE_4:
             self.move_used = None
@@ -384,63 +462,87 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                         self.heal(heal_percentage)
 
                     elif "Alter" in self.move_used.effect: # FIXME: Theres probably a better way to do this
-                        # Determine if 'User' is in the effect string
-                        # If it is in the string, set a variable to the user
-                        # If not, set a variable ot the target
+                        if "User" in self.move_used.effect: # If 'User' is in the effect string, set a variable to the user
+                            move_target = self.user
+                        else: # If not, set a variable ot the target
+                            move_target = self.target
                         # Then figure out what stats are being altered (Create a list object to store all of the stats being altered)
+                        alter_list = []
+                        if "Physical_Attack" in self.move_used.effect:
+                            alter_list.append(ATTACK)
+                        if "Special_Attack" in self.move_used.effect:
+                            alter_list.append(SP_ATTACK)
+                        if "Physical_Defense" in self.move_used.effect:
+                            alter_list.append(DEFENSE)
+                        if "Special_Defense" in self.move_used.effect:
+                            alter_list.append(SP_DEFENSE)
+                        if "Speed" in self.move_used.effect:
+                            alter_list.append(SPEED)
+                        if "Accuracy" in self.move_used.effect:
+                            alter_list.append(ACCURACY)
+                        if "Evasion" in self.move_used.effect:
+                            alter_list.append(EVASION)
+                        alter_magnitude = self.move_used.effect_magnitude
+                        for stat in alter_list:
+                            if stat == ATTACK:
+                                stat_name = "Attack"
+                            elif stat == SP_ATTACK:
+                                stat_name = "Special Attack"
+                            elif stat == DEFENSE:
+                                stat_name = "Defense"
+                            elif stat == SP_DEFENSE:
+                                stat_name = "Special Defense"
+                            elif stat == SPEED:
+                                stat_name = "Speed"
+                            elif stat == ACCURACY:
+                                stat_name = "Accuracy"
+                            elif stat == EVASION:
+                                stat_name = "Evasion"
+                            else:
+                                stat_name = "Error"
+                            curr_boost = move_target.get_boost_for_stat(stat)
+                            if alter_magnitude < 0:
+                                if curr_boost + alter_magnitude < -6:
+                                    raised_amount = -6 - curr_boost
+                                else:
+                                    raised_amount = alter_magnitude
+                                move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
+                                # Handle printing
+                                if self.visualization:
+                                    if raised_amount == -1:
+                                        print(move_target.name + "'s " + stat_name + " fell!")
+                                    elif raised_amount == -2:
+                                        print(move_target.name + "'s " + stat_name + " harshly fell!")
+                                    elif raised_amount < 0 :
+                                        print(move_target.name + "'s " + stat_name + " fell by " + str(raised_amount) + " stages!")
+                                    elif raised_amount == 0:
+                                        print(move_target.name + "'s " + stat_name + " couldn't get any lower!")
+                                    else:
+                                        print("Alter_Attack_User error")
+                            elif alter_magnitude > 0:
+                                if curr_boost + alter_magnitude > 6:
+                                    raised_amount = 6 - curr_boost
+                                else:
+                                    raised_amount = alter_magnitude
+                                move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
+                                # Handle printing
+                                if self.visualization:
+                                    if raised_amount == 1:
+                                        print(move_target.name + "'s " + stat_name + " rose!")
+                                    elif raised_amount == 2:
+                                        print(move_target.name + "'s " + stat_name + " sharply rose!")
+                                    elif raised_amount > 0:
+                                        print(move_target.name + "'s " + stat_name + " rose by " + str(raised_amount) + " stages!")
+                                    elif raised_amount == 0:
+                                        print(move_target.name + "'s " + stat_name + " couldn't get any higher!")
+                                    else:
+                                        print("Alter_Attack_User error")
+                            else:
+                                print("Warning: Alter effect magnitude is 0")
+                                         
                         # Special exception for Gear Shift which raises attack by one stage and speed by two stages
                         # Then figure out the magnitude of the alteration
                         # Then alter the stat
-                        
-                        if self.move_used.effect == "Alter_Attack":
-                            alter_magnitude = self.move_used.effect_magnitude
-                            if self.target.attack_boost > -6:
-                                self.target.attack_boost += alter_magnitude
-                            if self.visualization:
-                                print(self.target.name + "'s attack fell!")
-                        elif self.move_used.effect == "Alter_Attack_User":
-                            alter_magnitude = self.move_used.effect_magnitude
-                            if self.user.attack_boost > -6 and self.user.attack_boost < 6:
-                                self.user.attack_boost += alter_magnitude
-                                if self.user.attack_boost > 6:
-                                    self.user.attack_boost = 6
-                            if self.visualization:
-                                if alter_magnitude == 1:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s attack rose!")
-                                elif alter_magnitude == 2:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s attack sharply rose!")
-                                elif alter_magnitude > 0:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s attack rose by " + str(alter_magnitude) + " stages!")
-                                elif alter_magnitude == -1:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s attack fell!")
-                                elif alter_magnitude == -2:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s attack harshly fell!")
-                                elif alter_magnitude < 0 :
-                                    print(self.user_team.name + "'s " + self.user.name + "'s attack fell by " + str(alter_magnitude) + " stages!")
-                                else:
-                                    print("Alter_Attack_User error")
-                        elif self.move_used.effect == "Alter_Defense_User":
-                            alter_magnitude = self.move_used.effect_magnitude
-                            if self.user.defense_boost > -6 and self.user.defense_boost < 6:
-                                self.user.defense_boost += alter_magnitude
-                                if self.user.defense_boost > 6:
-                                    self.user.defense_boost = 6
-                            if self.visualization: # FIXME: If a move sharply raises the defense of a pokemon but they have stage 5 boost it will still say sharply rose
-                                if alter_magnitude == 1:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s defense rose!")
-                                elif alter_magnitude == 2:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s defense sharply rose!")
-                                elif alter_magnitude > 0:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s defense rose by " + str(alter_magnitude) + " stages!")
-                                elif alter_magnitude == -1:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s defense fell!")
-                                elif alter_magnitude == -2:
-                                    print(self.user_team.name + "'s " + self.user.name + "'s defense harshly fell!")
-                                elif alter_magnitude < 0 :
-                                    print(self.user_team.name + "'s " + self.user.name + "'s defense fell by " + str(alter_magnitude) + " stages!")
-                                else:
-                                    print("Alter_Defense_User error")
-
                     else:
                         if self.visualization:
                             print("Status move's effect is not implemented")
@@ -530,7 +632,8 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         return (self.priority, self.user.speed * self.user.get_multiplier_for_stat(SPEED))
 
 class TurnActionSummary:
-    def __init__(self,was_ai_action,damage_dealt = 0,was_switch_after_faint = False) -> None:
+    def __init__(self,was_ai_action,damage_dealt = 0,was_switch_after_faint = False, input_number = 0) -> None:
+        self.input_number = input_number
         self.was_ai_action = was_ai_action
         self.damage_dealt = damage_dealt
         self.user_missed = False
@@ -591,3 +694,19 @@ class TurnActionSummary:
 
     def set_damage_dealt(self, damage_dealt):
         self.damage_dealt = damage_dealt
+
+if __name__ == "__main__":
+    TestTeam = Team("TestTeam")
+    TestTeam.add_member(Monster(501, 50))
+    TestTeam2 = Team("TestTeam2")
+    TestTeam2.add_member(Monster(501, 51))
+    print(does_first_team_win_matchup(TestTeam, TestTeam2))
+    # Test code
+    # Create a team
+    # Create a monster
+    # Create a move
+    # Create a team
+    # Create a monster
+    # Create a move
+    # Create a game state
+    # Advance th
