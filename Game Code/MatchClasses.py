@@ -49,14 +49,10 @@ TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1
 def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_team, can_crit = True, visualization = True, is_struggle = False, crit_chance = DEFAULT_CRIT_CHANCE):
     if can_crit:
         roll = rng.randint(1,100)
-        #if visualization:
-        #    print("Roll: " + str(roll))
-        #    print("Crit chance: " + str(crit_chance))
-        # One in 24 chance of critical hit
         if roll < crit_chance:
             crit_mult = CRIT_MULTIPLIER
             if visualization:
-                print("Critical hit!")
+                print("Critical hit!", endl="")
         else:
             crit_mult = 1
     else:
@@ -441,7 +437,13 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                         result = self.do_damage(crit_chance=elevated_crit_chance)
                     elif self.move_used.effect == "Multi_Hit": # FIXME: Multi hit moves should respond to rng constraints so MTCS is less random
                         max_hits = int(self.move_used.effect_magnitude)
-                        hit_roll = rng.randint(2,max_hits)
+                        if not self.can_crit:
+                            if max_hits != 2:
+                                hit_roll = 3
+                            else:
+                                hit_roll = 2
+                        else:
+                            hit_roll = rng.randint(2,max_hits)
                         result = 0
                         for i in range(hit_roll):
                             result += self.do_damage()

@@ -22,18 +22,11 @@ class MonteCarloTreeSearch:
                 print(".", end="")
             leaf = self.traverse_tree(self.root) # Selection. leaf equals a node that does not have children, and conforms to the rollout policy. (Rollout policy detailed in node class)
             result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Choice of nodes is based on the rollout policy.
-            #if self.verbose:
-            #    print("Result of rollout: " + str(result))
             self.backpropagate_tree(leaf, result) # Backpropagation. Updates the stats of the nodes from the leaf to the root.
             i += 1
         if self.verbose:
             pass
-        #for child in self.root.children:
-        #        print("Child name: " + str(child.state.last_move) + ", UCB value: " + str(child.ucb))
-        #print("Best move is: " + str(self.root.best_child().state.last_move) + " with a ucb value of: " + str(self.root.best_child().ucb))
         print()
-        #return self.root.best_child().state.last_move
-        #print("Best move is: " + str(self.root.best_child_last_move()))
         return self.root.best_child_last_move()
     
     def traverse_tree(self, node): # Modified traversal function. Evenly spreads traversals between nodes with high ucb values and nodes with low visits. Game agnostic.
@@ -49,16 +42,6 @@ class MonteCarloTreeSearch:
             node = node.rollout_policy(random_policy=self.random_policy)
         if node.is_game_won(): # Not game agnostic, score returned is based on number of turns taken to win
             return 1 + node.state.get_victory_reward()
-            '''num_turns = node.state.turn_count
-            if num_turns == 0:
-                return 1
-            if num_turns == 1:
-                return 5
-            if num_turns < 3:
-                return 4
-            if num_turns < 6:
-                return 3
-            return 1 / num_turns'''
         else:
             return 0 + node.state.get_loss_reward()
 
