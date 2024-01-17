@@ -269,7 +269,6 @@ class GameState():
             return list_of_ai_choices
         
         elif self.player_needs_to_switch: # Switch Player monster, then return new state in the list
-            #return self.get_valid_switches_for_team(self.player_team)
             list_of_ai_choices = []
             valid_switch_indices = self.player_team.get_list_of_valid_switch_indices()
             if debug:
@@ -291,9 +290,6 @@ class GameState():
                     ai_switches[i] += 4 # Convert switch indices to switch inputs
             ai_moves_list = self.ai_team.get_member(self.ai_team.active_member_index).get_list_of_valid_move_numbers()
             ai_combination_list = ai_moves_list + ai_switches
-            # Alter player_moves to be a list of valid moves
-            #player_moves_list = self.player_team.get_member(self.player_team.active_member_index).get_list_of_valid_attack_move_numbers()
-            #if len(player_moves_list) == 0:
             player_moves_list = self.player_team.get_member(self.player_team.active_member_index).get_list_of_valid_move_numbers()
             if debug:
                 print("AI moves: " + str(ai_moves_list))
@@ -443,6 +439,17 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                     if self.move_used.effect == "High_Crit":
                         elevated_crit_chance = float(self.move_used.effect_chance)
                         result = self.do_damage(crit_chance=elevated_crit_chance)
+                    elif self.move_used.effect == "Multi_Hit": # FIXME: Multi hit moves should respond to rng constraints so MTCS is less random
+                        max_hits = int(self.move_used.effect_magnitude)
+                        hit_roll = rng.randint(2,max_hits)
+                        result = 0
+                        for i in range(hit_roll):
+                            result += self.do_damage()
+                        if self.visualization:
+                            if hit_roll == 1:
+                                print("Hit once!")
+                            else:
+                                print("Hit " + str(hit_roll) + " times!")
                     else: # None effect move, or move that hasn't been implemented
                         result = self.do_damage()   
                     if result: # If the move misses, no effect should occur
@@ -593,7 +600,6 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         return damage
 
     def do_damage(self, crit_chance = DEFAULT_CRIT_CHANCE):
-        damage = damage_calc(self.user, self.target, self.move_used, self.user_team, self.target_team, self.can_crit, self.visualization, crit_chance=crit_chance)
         type_multiplier = get_type_multiplier(self.move_used.type, self.target.type_1, self.target.type_2)
         if self.visualization:
             if type_multiplier > 1:
@@ -602,9 +608,11 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                 print("It doesn't affect " + self.target.name + "...", end=" ")
             elif type_multiplier < 1:
                 print("It's not very effective against " + self.target.name + "... ", end=" ")
+            #print(self.target.name + " took " + str(damage) + " damage!")    
+        damage = damage_calc(self.user, self.target, self.move_used, self.user_team, self.target_team, self.can_crit, self.visualization, crit_chance=crit_chance)
+        if self.visualization:
             target_hp_max = self.target.get_stat(MAX_HP)
             print(f"- {(damage / target_hp_max) * 100:.1f} %")
-            #print(self.target.name + " took " + str(damage) + " damage!")    
         self.target.HP -= damage
         self.turn_action_summary.set_damage_dealt(damage)
         if self.target.HP <= 0:
