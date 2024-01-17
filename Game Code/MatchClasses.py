@@ -26,7 +26,7 @@ DEFAULT_CRIT_CHANCE = (1 / 24) * 100
 # Game Constants
 MAX_TEAM_SIZE = 6
 TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':0, 'Dragon':1, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1},
-              'Fire':{'Normal':1, 'Fire':0.5, 'Water':0.5, 'Electric':1, 'Grass':2, 'Ice':2, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':2, 'Rock':0.5, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':2, 'Fairy':1, 'Typeless':1},
+              'Fire':{'Normal':1, 'Fire':0.5, 'Water':0.5, 'Electric':1, 'Grass':2, 'Ice':2, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':2, 'Rock':0.5, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':2, 'Fairy':0.5, 'Typeless':1},
               'Water':{'Normal':1, 'Fire':2, 'Water':0.5, 'Electric':1, 'Grass':0.5, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':2, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':2, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1},
               'Electric':{'Normal':1, 'Fire':1, 'Water':2, 'Electric':0.5, 'Grass':0.5, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':0, 'Flying':2, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1},
               'Grass':{'Normal':1, 'Fire':0.5, 'Water':2, 'Electric':1, 'Grass':0.5, 'Ice':1, 'Fighting':1, 'Poison':0.5, 'Ground':2, 'Flying':0.5, 'Psychic':1, 'Bug':0.5, 'Rock':2, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':0.5, 'Fairy':1, 'Typeless':1},
@@ -52,7 +52,7 @@ def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_te
         if roll < crit_chance:
             crit_mult = CRIT_MULTIPLIER
             if visualization:
-                print("Critical hit!", endl="")
+                print("Critical hit!", end="")
         else:
             crit_mult = 1
     else:
@@ -95,9 +95,7 @@ def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_te
     raw_calc = ((((2*user.level / 5 + 2) * move.base_power * (used_attack / used_defense)) / 50) + 2)
     multiplier_calc = (raw_calc * crit_mult * stab_mult * type_mult * used_attack_multiplier) / used_defense_multiplier
     if visualization:
-        #print(f"- {(multiplier_calc / target_hp_max) * 100:.1f} %")
         pass
-        #print("Raw calc (" + str(raw_calc) + ") * Crit (" + str(crit_mult) + ") * Stab (" + str(stab_mult) + ") Type (" + str(type_mult) + ") * Attack mult (" + str(used_attack_multiplier) + ") * Defense mult (" + str(used_defense_multiplier) + ") = " + str(multiplier_calc))
     return math.ceil(multiplier_calc)
 
 def get_type_multiplier(move_type, target_type_1, target_type_2 = None):
@@ -210,7 +208,7 @@ class GameState():
             return False
         for action in self.last_turn_summary:
             # If the action was an opponent switching in after fainting, return true
-            if action.target_fainted:
+            if action.target_fainted or action.user_fainted:
                 return True
         return False
     
@@ -221,7 +219,7 @@ class GameState():
             for action in self.last_turn_summary: # FIXME: This is not working for some reason. Possible bug with TurnActionSummary object
                 if action.was_ai_action and action.target_fainted: 
                     return True 
-                elif not action.was_ai_action and action.target_fainted:
+                elif not action.was_ai_action and action.target_fainted :
                     return False
             return False
 
@@ -259,6 +257,10 @@ class GameState():
                 print("Valid ai switch indices: " + str(valid_switch_indices))
                 if len(valid_switch_indices) == 0:
                     print("WARNING: No valid switches found for AI. ")
+                    print("Debug variables: ai_needs_to_switch: " + str(self.ai_needs_to_switch) + " player_needs_to_switch: " + str(self.player_needs_to_switch))
+                    print("Turn action summary: ")
+                    for action in self.last_turn_summary:
+                        print(action)
             for i in valid_switch_indices:
                 append_state = GameState(self.player_team.deep_copy(), self.ai_team.deep_copy(), self.turn_count).advance_game(i + 4) # 
                 list_of_ai_choices.append(append_state)
@@ -339,7 +341,7 @@ class GameState():
 
 def switch_after_fainting(switching_team: Team, switch_index, visualization = True): # Switches the active monster of a team
     if visualization:
-        print(switching_team.name, "sent out", switching_team.get_member(switch_index).name)
+        print(switching_team.name, "sent out", switching_team.get_member(switch_index).name + "!")
     switching_team.switch_active_member(switch_index)
 
 def turn(player_team: Team, player_choice, ai_team: Team, ai_choice, visualization = True, rng = True): # Calculates a turn in the game. Used in the GameState class, as well as by the game when a player makes an input
@@ -409,11 +411,14 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
             return 10 # Switching will always happen before moves (not counting Pursuit if that gets implemented)
     
     def excecute_action(self):
+        if self.visualization:
+            print()
         if self.uinp <= MOVE_4:
             self.turn_action_summary.record_move_as_attacking_move()
             if not self.user.fainted: # Check if user is fainted                
-                if self.move_used.pp == 0:
-                    print("But it failed! Move is out of PP:",self.move_used.pp)
+                if self.move_used.pp == 0: # FIXME: This is running during the MTCS algorithm, but it shouldn't be
+                    if self.visualization:
+                        print("But it failed! Move is out of PP:",self.move_used.pp)
                     self.turn_action_summary.record_move_failed()
                     return self.turn_action_summary
                 if self.visualization:
@@ -454,16 +459,19 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                                 print("Hit " + str(hit_roll) + " times!")
                     else: # None effect move, or move that hasn't been implemented
                         result = self.do_damage()   
-                    if result: # If the move misses, no effect should occur
+                    if result:
                         if self.move_used.effect == "Recoil":
                             recoil_result = self.recoil(result)
                             if self.visualization:
                                 print(self.user_team.name + "'s " + self.user.name + " took " + str(recoil_result) + " damage from recoil!")
                         elif self.move_used.effect == "Heal_Damage":
                             heal_percentage = self.move_used.effect_magnitude
-                            self.heal_by_percentage(heal_percentage)
+                            self.heal_by_amount(result, heal_percentage)
                         elif "Alter" in self.move_used.effect:
                             self.alter_boosts()
+                    elif self.move_used.effect != "None":
+                        if self.visualization:
+                            print("Move's effect is not implemented")
                     self.expend_pp()
                 else:
                     if self.move_used.effect == "Synthesis_Heal":
@@ -489,10 +497,7 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
             self.target.HP -= damage
             self.turn_action_summary.set_damage_dealt(damage)
             if self.target.HP <= 0:
-                self.target.not_fainted = False
-                self.target.fainted = True
-                self.target.HP = 0
-                self.turn_action_summary.record_fainted_target()
+                self.set_target_fainted()
             self.recoil(damage)
         else:
             try:
@@ -595,10 +600,7 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         damage = math.floor(damage_dealt / 3)
         self.user.HP -= damage
         if self.user.HP <= 0:
-                self.user.not_fainted = False
-                self.user.fainted = True
-                self.user.HP = 0
-                self.turn_action_summary.record_fainted_user()
+                self.set_user_fainted()
         return damage
 
     def do_damage(self, crit_chance = DEFAULT_CRIT_CHANCE):
@@ -618,12 +620,10 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         self.target.HP -= damage
         self.turn_action_summary.set_damage_dealt(damage)
         if self.target.HP <= 0:
-            self.target.not_fainted = False
-            self.target.fainted = True
-            self.target.HP = 0
-            self.turn_action_summary.record_fainted_target()
+            self.set_target_fainted()
         return damage
 
+    # FIXME: Healing should be added to the TurnActionSummary object
     def synthesis_heal(self): # FIXME: Implement weather
         heal_amount = math.floor(self.user.max_HP * 0.5)
         overheal_amount = heal_amount + self.user.HP - self.user.max_HP
@@ -657,6 +657,18 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         if overheal_amount > 0:
             self.user.HP = self.user.max_HP
 
+    def set_user_fainted(self):
+        self.user.fainted = True
+        self.user.not_fainted = False
+        self.user.HP = 0
+        self.turn_action_summary.record_fainted_user()
+
+    def set_target_fainted(self):
+        self.target.fainted = True
+        self.target.not_fainted = False
+        self.target.HP = 0
+        self.turn_action_summary.record_fainted_target()
+
     def expend_pp(self): # FIXME: How will pressure work?
         self.move_used.expend_pp()
 
@@ -678,6 +690,9 @@ class TurnActionSummary:
         self.was_switch_after_faint = was_switch_after_faint
         self.target_fainted = False
         self.user_fainted = False
+
+    def __str__(self) -> str:
+        return f"Input number: {self.input_number}\nWas AI action: {self.was_ai_action}\nDamage dealt: {self.damage_dealt}\nUser missed: {self.user_missed}\nMove failed: {self.move_failed}\nMove was not very effective: {self.move_was_not_very_effective}\nWas effect move: {self.was_effect_move}\nWas attacking move: {self.was_attacking_move}\nWas switch: {self.was_switch}\nWas struggle: {self.was_struggle}\nWas switch after faint: {self.was_switch_after_faint}\nTarget fainted: {self.target_fainted}\nUser fainted: {self.user_fainted}\n"
 
     def user_attacked_and_did_no_damage(self):
         if self.was_attacking_move and self.damage_dealt == 0:

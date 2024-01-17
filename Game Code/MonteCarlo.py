@@ -1,11 +1,10 @@
 from math import *
-#from random import *
 import random as rng
 from MatchClasses import GameState # Dependency for Node class
 
 # --- GLOBAL VARIABLES ---
-exploration_parameter = 1.4 # Exploration parameter for UCB formula. Higher value means more exploration. 
-ai_intelligence = 10000 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
+exploration_parameter = 1.5 # Exploration parameter for UCB formula. Higher value means more exploration. 
+ai_intelligence = 16000 # Number of iterations of the monte carlo tree search. Higher value means more accurate results, but more time taken.
 search_depth = 15 # Depth of the search tree. Higher value means more accurate results, but more time taken.
 
 # --- MONTE CARLO TREE SEARCH CLASS ---
@@ -18,7 +17,7 @@ class MonteCarloTreeSearch:
     def get_best_move(self):
         i = 0
         while i < ai_intelligence:
-            if i % 200 == 0:
+            if i % 600 == 0:
                 print(".", end="")
             leaf = self.traverse_tree(self.root) # Selection. leaf equals a node that does not have children, and conforms to the rollout policy. (Rollout policy detailed in node class)
             result = self.rollout(leaf) # Expansion/Simulation. Picks random unexpanded child of leaf, and simulates a game from there. Choice of nodes is based on the rollout policy.

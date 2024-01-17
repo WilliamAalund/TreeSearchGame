@@ -3,9 +3,38 @@ from MonteCarlo import MonteCarloTreeSearch
 from PlayerClass import Player
 
 
-trainer_level = 5
+trainer_level = 50
+
+def infinite_game():
+    player_lost = False
+    player_wins = 0
+    player_team = Team("Player")
+    player_team.add_member(Monster(497, trainer_level))
+    player_team.add_member(Monster(500, trainer_level))
+    player_team.add_member(Monster(503, trainer_level))
+    while not player_lost:
+        enemy_team = generate_enemy_team(member_count=3)
+        match_result = match(player_team, enemy_team)
+        if match_result == 0:
+            player_lost = True
+            print("Player lost")
+        else:
+            print("Player won")
+            player_wins += 1
+            print("Player wins: " + str(player_wins))
+        player_team.fully_heal_team()
+        
+def generate_enemy_team(member_count = 3):
+    enemy_team = Team("Enemy")
+    num_team_members = member_count
+    if num_team_members == 1:
+        print("Invalid member count: setting to one")
+    for i in range(num_team_members):
+        enemy_team.add_member(Monster(rng.randint(494,567), trainer_level))
+    return enemy_team
 
 def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=False, verbose_MTCS=False): # Runs a match between two teams. Returns 1 if player won, 0 if AI won
+    
     player_team.active_member_index = 0
     ai_team.active_member_index = 0
     while player_team.has_non_fainted_members() and ai_team.has_non_fainted_members(): # Match loop
@@ -20,8 +49,10 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
             else:
                 ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=random_ai_policy).get_best_move()
             switch_after_fainting(ai_team, ai_choice - 4)
+        print("-----------------------------------------")   
         gm.battle_scene(player_team, ai_team)
         uinp = gm.battle_menu_input(player_team.get_member(player_team.active_member_index).get_list_of_moves(), player_team.get_list_of_member_names_to_switch_to(), player_team.get_list_of_valid_switch_indices())
+        print("-----------------------------------------")    
         if uinp == 10: # FIXME: Implement player losing by running away
             print("Player ran away!")
             return 0 
@@ -47,22 +78,6 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
     else:
         print(ai_team.name + " defeated " + player_team.name + "!")
         return 0
-
-def game():
-    player = Player()
-    wins = 0
-    opponent = generate_enemy_team()
-    match_result = match(player.team, opponent, random_ai=True,random_ai_policy=True)
-    if match_result:
-        wins += 1
-    else:
-        pass
-    print(wins)
-    
-def generate_enemy_team():
-    enemy_team = Team("Enemy")
-    enemy_team.add_member(Monster(504, trainer_level))
-    return enemy_team
 
 def test_game(random_ai = False):
     # Match between two teams of 2 of the same pokemon
@@ -146,4 +161,14 @@ def multi_hit_attack_game(random_ai = False):
     ai_team.add_member(Monster(SWADLOON, 15))
     match_result = match(player_team, ai_team, random_ai=random_ai)
 
-multi_hit_attack_game(random_ai = False)
+def bug_game(random_ai = False, verbose_MTCS=False): # FIXED: Bug where AI taking recoil and fainting would not cause a node to be terminal
+    # Match between player team of Serperior, Samurott, and Emboar, and an Audino
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(SERPERIOR, 50))
+    player_team.add_member(Monster(SAMUROTT, 50))
+    player_team.add_member(Monster(EMBOAR, 50))
+    ai_team.add_member(Monster(AUDINO, 50))
+    match_result = match(player_team, ai_team, random_ai=random_ai, verbose_MTCS=verbose_MTCS)
+
+infinite_game()
