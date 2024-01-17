@@ -79,7 +79,7 @@ class Node: # Class designed in a game state agnostic way
         self.visits = 0
         self.node_expanded = False
         self.parent = parent
-        self.is_terminal = self.state.did_elimination_occur()
+        self.is_terminal = self.set_node_terminality() # WHEN REFERRING TO THIS VARIABLE, USE THE METHOD, NOT THE VARIABLE ITSELF. This is because the variable is set when the node is initialized, and will not change if the state changes.
         self.verbose = verbose
         #self.is_terminal = self.state.is_game_over()
         #self.is_terminal = self.state.did_ai_get_an_elimination() or self.state.did_player_get_an_elimination() # FIXME: Will encourage AI to use a move like explosion if it is the only way to win. Should be changed to is_game_over() when that is implemented.
@@ -94,16 +94,17 @@ class Node: # Class designed in a game state agnostic way
     def node_is_root(self): # Root if parent is None
         return self.parent is None
     
+    def set_node_terminality(self): # Method to be called when initializing node. Will set the self.is_terminal property
+        return self.state.state_is_terminal() or self.state.turn_count > search_depth
+
     def node_is_terminal(self):
-        if self.verbose:
-            print("node_is_terminal called")
-            print("Is terminal: " + str(self.is_terminal) + ", turn count: " + str(self.state.turn_count) + ", search depth: " + str(search_depth))
-        return self.is_terminal or self.state.turn_count > search_depth
+        #if self.verbose:
+        #    print("node_is_terminal called")
+        #    print("Is terminal: " + str(self.is_terminal) + ", turn count: " + str(self.state.turn_count) + ", search depth: " + str(search_depth))
+        return self.is_terminal
 
     def is_game_won(self): # TODO: Integrate both forms of MTCS into node: one that simulates the whole game, and one that simulates until an elimination is achieved.
-        #return self.state.did_ai_win()
-        return self.state.was_matchup_won()
-        #return self.state.did_elimination_occur() and self.state.did_ai_win_a_matchup()
+        return self.state.state_is_victory()
     
     def node_get_parent(self):
         if self.node_is_root():
@@ -121,9 +122,6 @@ class Node: # Class designed in a game state agnostic way
             self.children.append(Node(state,self, verbose=self.verbose))
         self.node_expanded = True
     
-    def result(self): # Returns if the AI won or lost on a terminal node. Game agnostic. Called in MonteCarloTreeSearch class
-        return self.state.did_ai_win_a_matchup()
-    
     def rollout_policy(self, random_policy = True):
         if not self.node_expanded and not self.node_is_terminal():
             self.expand() # Flips node_expanded to True
@@ -131,7 +129,9 @@ class Node: # Class designed in a game state agnostic way
                 self.print_children()
             if len(self.children) == 0:
                 if self.verbose:
-                    print("No children, but node is not terminal, and rollout policy is being called.")
+                    print("WARNING: No children, but node is not terminal, and rollout policy is being called.")
+                    print("self.is_terminal: ", self.node_is_terminal())
+                    print("Conditional: not self.node_expanded and not self.node_is_terminal(): ", not self.node_expanded and not self.node_is_terminal())
                     print(self)
         else:
             return

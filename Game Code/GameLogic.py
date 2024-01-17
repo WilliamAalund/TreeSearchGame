@@ -22,8 +22,6 @@ def generate_enemy_team():
     enemy_team.add_member(Monster(504, trainer_level))
     return enemy_team
 
-
-
 def test_game(random_ai = False):
     # Match between two teams of 2 of the same pokemon
     player_team = Team("Player")
@@ -40,7 +38,6 @@ def starter_game(random_ai = False):
     ai_team = Team("Enemy")
     player_team.add_member(Monster(SAMUROTT, 15))
     player_team.add_member(Monster(SERPERIOR, 15))
-    player_team.add_member(Monster(EMBOAR, 15))
     player_team.add_member(Monster(EMBOAR, 15))
     ai_team.add_member(Monster(SAMUROTT, 15))
     ai_team.add_member(Monster(SERPERIOR, 15))
@@ -75,9 +72,31 @@ def error_game(random_ai = False):
     ai_team.add_member(Monster(SNIVY, 15))
     match_result = match(player_team, ai_team, random_ai=random_ai)
 
+def alter_boost_after_attack_game(random_ai = False):
+    # Match between two teams of one cobalion with superpower
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(COBALION, 15))
+    ai_team.add_member(Monster(COBALION, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
 
+def alter_boost_after_effect_move_game(random_ai = False):
+    # Match between two teams of terrakion with tackle and swords dance
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(TERRAKION, 15))
+    ai_team.add_member(Monster(TERRAKION, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
 
-def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=False): # Runs a match between two teams. Returns 1 if player won, 0 if AI won
+def heal_after_attack_game(random_ai = False):
+    # Match between two teams of one serperior with gigadrain
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(SERPERIOR, 15))
+    ai_team.add_member(Monster(SERPERIOR, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
+
+def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=False, verbose_MTCS=False): # Runs a match between two teams. Returns 1 if player won, 0 if AI won
     player_team.active_member_index = 0
     ai_team.active_member_index = 0
     while player_team.has_non_fainted_members() and ai_team.has_non_fainted_members(): # Match loop
@@ -109,13 +128,14 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
             else:
                 current_game_state = GameState(player_team, ai_team)
                 print("AI is thinking...", end="")
-                ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=False, verbose=False).get_best_move()
+                ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=False, verbose=verbose_MTCS).get_best_move()
             turn(player_team, uinp, ai_team, ai_choice)
     # Match over
     if player_team.has_non_fainted_members():
+        print(player_team.name + " defeated " + ai_team.name + "!")
         return 1
     else:
-        print("AI wins")
+        print(ai_team.name + " defeated " + player_team.name + "!")
         return 0
 
-error_game(random_ai=False)
+heal_after_attack_game(random_ai=True)

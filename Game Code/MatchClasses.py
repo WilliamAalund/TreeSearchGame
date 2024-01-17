@@ -25,7 +25,7 @@ DEFAULT_CRIT_CHANCE = (1 / 24) * 100
 
 # Game Constants
 MAX_TEAM_SIZE = 6
-TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':2, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':0, 'Dragon':1, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1},
+TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':0, 'Dragon':1, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1},
               'Fire':{'Normal':1, 'Fire':0.5, 'Water':0.5, 'Electric':1, 'Grass':2, 'Ice':2, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':2, 'Rock':0.5, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':2, 'Fairy':1, 'Typeless':1},
               'Water':{'Normal':1, 'Fire':2, 'Water':0.5, 'Electric':1, 'Grass':0.5, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':2, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':2, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1},
               'Electric':{'Normal':1, 'Fire':1, 'Water':2, 'Electric':0.5, 'Grass':0.5, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':0, 'Flying':2, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':0.5, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1},
@@ -76,17 +76,6 @@ def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_te
         stab_mult = 1 # Same type attack bonus
     type_mult = 1
     type_mult = get_type_multiplier(move.type, target.type_1, target.type_2)
-    #type_mult = 1
-    #type_mult *= TYPE_CHART[move.type][target.type_1]
-    #if target.type_2:
-    #    type_mult *= TYPE_CHART[move.type][target.type_2]
-    #if visualization:
-    #    if type_mult > 1:
-    #        print("It's super effective!")
-    #    elif type_mult == 0:
-    #        print("It doesn't affect " + target.name + "...")
-    #    elif type_mult < 1:
-    #        print("It's not very effective...")
     if move.category == 'Physical':
         used_attack = user.attack
         used_attack_multiplier = user.get_multiplier_for_stat(ATTACK)
@@ -111,7 +100,8 @@ def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_te
     multiplier_calc = (raw_calc * crit_mult * stab_mult * type_mult * used_attack_multiplier) / used_defense_multiplier
     if visualization:
         #print(f"- {(multiplier_calc / target_hp_max) * 100:.1f} %")
-        print("Raw calc (" + str(raw_calc) + ") * Crit (" + str(crit_mult) + ") * Stab (" + str(stab_mult) + ") Type (" + str(type_mult) + ") * Attack mult (" + str(used_attack_multiplier) + ") * Defense mult (" + str(used_defense_multiplier) + ") = " + str(multiplier_calc))
+        pass
+        #print("Raw calc (" + str(raw_calc) + ") * Crit (" + str(crit_mult) + ") * Stab (" + str(stab_mult) + ") Type (" + str(type_mult) + ") * Attack mult (" + str(used_attack_multiplier) + ") * Defense mult (" + str(used_defense_multiplier) + ") = " + str(multiplier_calc))
     return math.ceil(multiplier_calc)
 
 def get_type_multiplier(move_type, target_type_1, target_type_2 = None):
@@ -188,14 +178,6 @@ def does_first_team_win_matchup(user_team: Team, target_team: Team):
         return True
     else:
         return False
-    
-    '''while not user.fainted and not target.fainted:
-        turn(user_team, user_strongest_move, target_team, target_strongest_move, visualization=False, rng=False)
-    # Return True if user_team wins, False if target_team wins
-    if target.fainted and not user.fainted: # FIXME: Not implemented
-        return True
-    else:
-        return False'''
 
 
 class GameState():
@@ -207,14 +189,19 @@ class GameState():
         self.ai_has_switched_after_fainting = False
         self.turn_count = turn_count
         self.last_move = last_move
-        self.winner = None
         self.last_turn_summary = None
-        self.policy_rating = self.calculate_policy_rating()
+        self.policy_rating = self.calculate_policy_rating() # Called in MTCS algorithm
     
-    def __str__(self) -> str:
-        return f"Player team: {self.player_team}\nAI team: {self.ai_team}\nTurn count: {self.turn_count}\nLast move: {self.last_move}\nGame over: {self.did_elimination_occur()}\nWinner: {self.winner}\nPolicy rating: {self.policy_rating}\nAmount of ai possible actions: {len(self.get_ai_possible_actions(debug=True))}\n"
+    def __str__(self) -> str: # Called in MTCS algorithm when debugging
+        return f"Player team: {self.player_team}\nAI team: {self.ai_team}\nTurn count: {self.turn_count}\nLast move: {self.last_move}\nLast turn summary: {self.last_turn_summary}\nGame over: {self.state_is_terminal()}\nPolicy rating: {self.policy_rating}\nNumber of AI possible actions: {len(self.get_ai_possible_actions(debug=True))}\n"
 
-    def calculate_policy_rating(self):
+    def state_is_terminal(self): # Called in MTCS algorithm
+        return self.did_elimination_occur()
+
+    def state_is_victory(self): # Called in MTCS algorithm
+        return self.did_ai_win_a_matchup()
+
+    def calculate_policy_rating(self): # Called in MTCS algorithm
         policy_rating = 0
         if self.did_elimination_occur() and self.did_ai_win_a_matchup(): # If the node is a victory for the AI, policy rating is 100
             policy_rating = 100
@@ -229,7 +216,7 @@ class GameState():
             # If the action was an opponent switching in after fainting, return true
             if action.target_fainted:
                 return True
-            return False
+        return False
     
     def did_ai_win_a_matchup(self):
         if not self.last_turn_summary:
@@ -240,15 +227,6 @@ class GameState():
                     return True 
                 elif not action.was_ai_action and action.target_fainted:
                     return False
-            return False
-    
-    def was_matchup_won(self):
-        if self.did_elimination_occur():
-            if self.did_ai_win_a_matchup():
-                return True
-            else:
-                return False
-        else:
             return False
 
     def get_victory_reward(self): # Number that represents magnitude by which the AI won.
@@ -414,7 +392,7 @@ def turn(player_team: Team, player_choice, ai_team: Team, ai_choice, visualizati
     return action_summaries
         
     
-
+###################################### TURN ACTION CLASS ######################################
 class TurnAction: # Used in turn function to organize actions that need to be taken
     def __init__(self, user, user_team, uinp, target, target_team, was_ai_action, visualization = True, can_crit = True) -> None:
         self.was_ai_action = was_ai_action
@@ -453,6 +431,14 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                     else:
                         print(" on " + self.target.name + "!")
                 
+                accuracy_check = self.accuracy_check(self.move_used.accuracy)
+                if not accuracy_check:
+                    if self.visualization:
+                        print("But it missed!")
+                    self.turn_action_summary.record_as_missed()
+                    self.turn_action_summary.set_damage_dealt(0)
+                    return self.turn_action_summary
+                
                 if self.move_used.category == 'Physical' or self.move_used.category == 'Special':
                     if self.move_used.effect == "High_Crit":
                         elevated_crit_chance = float(self.move_used.effect_chance)
@@ -466,10 +452,9 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                                 print(self.user_team.name + "'s " + self.user.name + " took " + str(recoil_result) + " damage from recoil!")
                         elif self.move_used.effect == "Heal_Damage":
                             heal_percentage = self.move_used.effect_magnitude
-                            self.heal_by_amount(damage_dealt=result, heal_percentage=heal_percentage)
                             self.heal_by_percentage(heal_percentage)
-                        #elif "Alter" in self.move_used.effect:
-                        #    self.alter_boost()
+                        elif "Alter" in self.move_used.effect:
+                            self.alter_boosts()
                     self.expend_pp()
                 else:
                     if self.move_used.effect == "Synthesis_Heal":
@@ -477,90 +462,9 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                     elif self.move_used.effect == "Heal_User":
                         heal_percentage = self.move_used.effect_magnitude
                         self.heal_by_percentage(heal_percentage)
-
                     elif "Alter" in self.move_used.effect: # FIXME: Theres probably a better way to do this
-                        #self.alter_boost()
-                        if "User" in self.move_used.effect: # If 'User' is in the effect string, set a variable to the user
-                            move_target = self.user
-                        else: # If not, set a variable ot the target
-                            move_target = self.target
-                        # Then figure out what stats are being altered (Create a list object to store all of the stats being altered)
-                        alter_list = []
-                        if "Physical_Attack" in self.move_used.effect:
-                            alter_list.append(ATTACK)
-                        if "Special_Attack" in self.move_used.effect:
-                            alter_list.append(SP_ATTACK)
-                        if "Physical_Defense" in self.move_used.effect:
-                            alter_list.append(DEFENSE)
-                        if "Special_Defense" in self.move_used.effect:
-                            alter_list.append(SP_DEFENSE)
-                        if "Speed" in self.move_used.effect:
-                            alter_list.append(SPEED)
-                        if "Accuracy" in self.move_used.effect:
-                            alter_list.append(ACCURACY)
-                        if "Evasion" in self.move_used.effect:
-                            alter_list.append(EVASION)
-                        alter_magnitude = self.move_used.effect_magnitude
-                        for stat in alter_list:
-                            if stat == ATTACK:
-                                stat_name = "Attack"
-                            elif stat == SP_ATTACK:
-                                stat_name = "Special Attack"
-                            elif stat == DEFENSE:
-                                stat_name = "Defense"
-                            elif stat == SP_DEFENSE:
-                                stat_name = "Special Defense"
-                            elif stat == SPEED:
-                                stat_name = "Speed"
-                            elif stat == ACCURACY:
-                                stat_name = "Accuracy"
-                            elif stat == EVASION:
-                                stat_name = "Evasion"
-                            else:
-                                stat_name = "Error"
-                            curr_boost = move_target.get_boost_for_stat(stat)
-                            if alter_magnitude < 0:
-                                if curr_boost + alter_magnitude < -6:
-                                    raised_amount = -6 - curr_boost
-                                else:
-                                    raised_amount = alter_magnitude
-                                move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
-                                # Handle printing
-                                if self.visualization:
-                                    if raised_amount == -1:
-                                        print(move_target.name + "'s " + stat_name + " fell!")
-                                    elif raised_amount == -2:
-                                        print(move_target.name + "'s " + stat_name + " harshly fell!")
-                                    elif raised_amount < 0 :
-                                        print(move_target.name + "'s " + stat_name + " fell by " + str(raised_amount) + " stages!")
-                                    elif raised_amount == 0:
-                                        print(move_target.name + "'s " + stat_name + " couldn't get any lower!")
-                                    else:
-                                        print("Alter_Attack_User error")
-                            elif alter_magnitude > 0:
-                                if curr_boost + alter_magnitude > 6:
-                                    raised_amount = 6 - curr_boost
-                                else:
-                                    raised_amount = alter_magnitude
-                                move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
-                                # Handle printing
-                                if self.visualization:
-                                    if raised_amount == 1:
-                                        print(move_target.name + "'s " + stat_name + " rose!")
-                                    elif raised_amount == 2:
-                                        print(move_target.name + "'s " + stat_name + " sharply rose!")
-                                    elif raised_amount > 0:
-                                        print(move_target.name + "'s " + stat_name + " rose by " + str(raised_amount) + " stages!")
-                                    elif raised_amount == 0:
-                                        print(move_target.name + "'s " + stat_name + " couldn't get any higher!")
-                                    else:
-                                        print("Alter_Attack_User error")
-                            else:
-                                print("Warning: Alter effect magnitude is 0")
-                                         
+                        self.alter_boosts()            
                         # Special exception for Gear Shift which raises attack by one stage and speed by two stages
-                        # Then figure out the magnitude of the alteration
-                        # Then alter the stat
                     else:
                         if self.visualization:
                             print("Status move's effect is not implemented")
@@ -584,14 +488,22 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         else:
             try:
                 if self.visualization:
-                    print(self.user.name + " switched out for " + self.user_team.get_member(self.uinp - 4).name)
+                    print(self.user_team.name + " switched out " + self.user.name + " for " + self.user_team.get_member(self.uinp - 4).name)
                 self.user_team.switch_active_member(self.uinp - 4)
                 self.turn_action_summary.record_move_as_switch()
             except:
                 print("Switching error")
         return self.turn_action_summary
     
-    def alter_boost(self):
+    def accuracy_check(self, accuracy):
+        if accuracy > 100:
+            return True
+        elif accuracy >= rng.randint(1,100):
+            return True
+        else:
+            return False
+
+    def alter_boosts(self):
         if "User" in self.move_used.effect: # If 'User' is in the effect string, set a variable to the user
             move_target = self.user
         else: # If not, set a variable ot the target
@@ -683,30 +595,23 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
     def do_damage(self, crit_chance = DEFAULT_CRIT_CHANCE):
         damage = damage_calc(self.user, self.target, self.move_used, self.user_team, self.target_team, self.can_crit, self.visualization, crit_chance=crit_chance)
         type_multiplier = get_type_multiplier(self.move_used.type, self.target.type_1, self.target.type_2)
-        if self.move_used.accuracy >= rng.randint(1,100):
-            if self.visualization:
-                if type_multiplier > 1:
-                    print("It's super effective!", end=" ")
-                elif type_multiplier == 0:
-                    print("It doesn't affect " + self.target.name + "...", end=" ")
-                elif type_multiplier < 1:
-                    print("It's not very effective against " + self.target.name + "... ", end=" ")
-                target_hp_max = self.target.get_stat(MAX_HP)
-                print(f"- {(damage / target_hp_max) * 100:.1f} %")
-                #print(self.target.name + " took " + str(damage) + " damage!")    
-            self.target.HP -= damage
-            self.turn_action_summary.set_damage_dealt(damage)
-            if self.target.HP <= 0:
-                self.target.not_fainted = False
-                self.target.fainted = True
-                self.target.HP = 0
-                self.turn_action_summary.record_fainted_target()
-        else:
-            if self.visualization:
-                print("The attack missed!")
-            damage = 0
-            self.turn_action_summary.set_damage_dealt(damage)
-            self.turn_action_summary.record_as_missed()
+        if self.visualization:
+            if type_multiplier > 1:
+                print("It's super effective!", end=" ")
+            elif type_multiplier == 0:
+                print("It doesn't affect " + self.target.name + "...", end=" ")
+            elif type_multiplier < 1:
+                print("It's not very effective against " + self.target.name + "... ", end=" ")
+            target_hp_max = self.target.get_stat(MAX_HP)
+            print(f"- {(damage / target_hp_max) * 100:.1f} %")
+            #print(self.target.name + " took " + str(damage) + " damage!")    
+        self.target.HP -= damage
+        self.turn_action_summary.set_damage_dealt(damage)
+        if self.target.HP <= 0:
+            self.target.not_fainted = False
+            self.target.fainted = True
+            self.target.HP = 0
+            self.turn_action_summary.record_fainted_target()
         return damage
 
     def synthesis_heal(self): # FIXME: Implement weather
@@ -818,12 +723,3 @@ if __name__ == "__main__":
     TestTeam2 = Team("TestTeam2")
     TestTeam2.add_member(Monster(501, 51))
     print(does_first_team_win_matchup(TestTeam, TestTeam2))
-    # Test code
-    # Create a team
-    # Create a monster
-    # Create a move
-    # Create a team
-    # Create a monster
-    # Create a move
-    # Create a game state
-    # Advance th
