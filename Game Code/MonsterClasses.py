@@ -26,6 +26,13 @@ STARTER_1 = 495
 STARTER_2 = 498
 STARTER_3 = 501
 
+POISON = 0
+TOXIC_POISON = 1
+PARALYSIS = 2
+BURN = 3
+FREEZE = 4
+SLEEP = 5
+
 NATURE_DICT = {'Hardy': (ATTACK, ATTACK), 'Lonely': (ATTACK, DEFENSE), 'Adamant': (ATTACK, SP_ATTACK), 'Naughty': (ATTACK, SP_DEFENSE), 'Brave': (ATTACK, SPEED),
               'Bold': (DEFENSE, ATTACK), 'Docile': (DEFENSE, DEFENSE), 'Impish': (DEFENSE, SP_ATTACK), 'Lax': (ATTACK, SP_DEFENSE), 'Relaxed': (DEFENSE, SPEED),
               'Modest': (SP_ATTACK, ATTACK), 'Mild': (SP_ATTACK, DEFENSE), 'Bashful': (SP_ATTACK, SP_ATTACK), 'Rash': (SP_ATTACK, SP_DEFENSE), 'Quiet': (SP_ATTACK, SPEED),
@@ -49,7 +56,7 @@ class Monster: #TODO: set up move database for each monster
             self.name = deep_copy.name
             self.not_fainted = deep_copy.not_fainted
             self.fainted = deep_copy.fainted
-            self.status = deep_copy.status
+            self.status_condition = deep_copy.status_condition
             self.item = deep_copy.item
             self.level = deep_copy.level
             self.HP = deep_copy.HP
@@ -110,7 +117,7 @@ class Monster: #TODO: set up move database for each monster
             self.name = None
             self.not_fainted = True
             self.fainted = False
-            self.status = None
+            self.status_condition = None
             self.item = None
             self.level = level
             self.HP = 0
@@ -305,6 +312,38 @@ class Monster: #TODO: set up move database for each monster
             return 0.25
         else:
             return 1
+
+    def get_experienced_stat(self, stat): # Returns the stat value after boosts are applied
+        if stat == ATTACK:
+            if self.status_condition == BURN:
+                return int(self.attack * self.get_multiplier_for_stat(ATTACK) * 0.5)
+            return int(self.attack * self.get_multiplier_for_stat(ATTACK))
+        elif stat == DEFENSE:
+            return int(self.defense * self.get_multiplier_for_stat(DEFENSE))
+        elif stat == SP_ATTACK:
+            return int(self.special_attack * self.get_multiplier_for_stat(SP_ATTACK))
+        elif stat == SP_DEFENSE:
+            return int(self.special_defense * self.get_multiplier_for_stat(SP_DEFENSE))
+        elif stat == SPEED:
+            if self.status_condition == PARALYSIS:
+                return int(self.speed * 0.25)
+            return int(self.speed * self.get_multiplier_for_stat(SPEED))
+
+    def get_status_string(self):
+        if self.status_condition == PARALYSIS:
+            return "\033[33mPAR\033[0m"  # Yellow
+        elif self.status_condition == POISON:
+            return "\033[35mPSN\033[0m"  # Purple
+        elif self.status_condition == TOXIC_POISON:
+            return "\033[35mTOX\033[0m"  # Purple
+        elif self.status_condition == BURN:
+            return "\033[31mBRN\033[0m"  # Red
+        elif self.status_condition == SLEEP:
+            return "\033[34mSLP\033[0m"  # Blue
+        elif self.status_condition == FREEZE:
+            return "\033[36mFRZ\033[0m"  # Cyan
+        else:
+            return ""
 
     def set_recharge(self):
         self.must_recharge = not self.must_recharge
@@ -533,7 +572,7 @@ class Monster: #TODO: set up move database for each monster
             self.move_3.pp = self.move_3.base_pp
         if self.move_4:
             self.move_4.pp = self.move_4.base_pp
-        self.status = None
+        self.status_condition = None
         self.reset_boosts()
         self.fainted = False
         self.not_fainted = True

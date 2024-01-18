@@ -420,7 +420,16 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
             print()
         if self.uinp <= MOVE_4:
             self.turn_action_summary.record_move_as_attacking_move()
-            if not self.user.fainted: # Check if user is fainted   
+            if not self.user.fainted: # Check if user is fainted  
+                if self.user.status_condition == PARALYSIS and self.can_crit:
+                    if rng.randint(1,4) == 1:
+                        if self.visualization:
+                            print(self.user_team.name + "'s " + self.user.name + " is fully paralyzed and can't move!")
+                        self.turn_action_summary.record_as_paralyzed()
+                        if self.user.must_recharge:
+                            self.user.set_recharge()
+                            self.turn_action_summary.record_user_recharging()
+                        return self.turn_action_summary 
                 if self.user.must_recharge:
                     self.user.set_recharge()
                     if self.visualization:
@@ -448,6 +457,14 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                     return self.turn_action_summary
                 
                 if self.move_used.category == 'Physical' or self.move_used.category == 'Special':
+                    if self.move_used.effect == "Halve_HP":
+                        damage = max(1,math.floor(self.target.HP / 2))
+                        self.do_set_damage(damage)
+                        return self.turn_action_summary
+                    elif self.move_used.effect == "40_Damage":
+                        damage = 40
+                        self.do_set_damage(damage)
+                        return self.turn_action_summary
                     if self.move_used.effect == "High_Crit":
                         elevated_crit_chance = float(self.move_used.effect_chance)
                         result = self.do_damage(crit_chance=elevated_crit_chance)
@@ -486,12 +503,11 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                             self.alter_boosts()
                         elif self.move_used.effect == "Recharge":
                             self.user.set_recharge()
-                        elif self.move_used.effect != "None":
-                            if self.visualization:
-                                print("Move's effect is not implemented")
                     self.expend_pp()
                 else:
-                    if self.move_used.effect == "Synthesis_Heal":
+                    if self.move_used.effect == "Paralyze":
+                        self.paralyze()
+                    elif self.move_used.effect == "Synthesis_Heal":
                         self.synthesis_heal()
                     elif self.move_used.effect == "Heal_User":
                         heal_percentage = self.move_used.effect_magnitude
@@ -528,6 +544,19 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                 print("Switching error")
         return self.turn_action_summary
     
+    def paralyze(self, attack_condition = False): # attack_condition determines if this method is being called by an attacking or an effect move
+        if self.target.status_condition == None and not self.target.fainted:
+            self.target.status_condition = PARALYSIS
+            if self.visualization:
+                print(self.target.name + " was paralyzed!")
+        else:
+            if attack_condition:
+                pass
+            else:
+                if self.visualization:
+                    print("But it failed!")
+                self.turn_action_summary.record_move_failed()
+
     def accuracy_check(self, accuracy):
         if accuracy > 100:
             return True
@@ -667,6 +696,15 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                 self.set_user_fainted()
         return damage
 
+    def do_set_damage(self, damage):
+        self.target.HP -= damage
+        if self.visualization:
+            target_hp_max = self.target.get_stat(MAX_HP)
+            print(f"- {(damage / target_hp_max) * 100:.1f} %")
+        self.turn_action_summary.set_damage_dealt(damage)
+        if self.target.HP <= 0:
+            self.set_target_fainted()
+
     def do_damage(self, crit_chance = DEFAULT_CRIT_CHANCE):
         type_multiplier = get_type_multiplier(self.move_used.type, self.target.type_1, self.target.type_2)
         if self.visualization:
@@ -737,7 +775,7 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         self.move_used.expend_pp()
 
     def get_action_priority(self): # Priority is a tuple of (speed, priority)
-        return (self.priority, self.user.speed * self.user.get_multiplier_for_stat(SPEED))
+        return (self.priority, self.user.get_experienced_stat(SPEED))
 
 class TurnActionSummary:
     def __init__(self,was_ai_action,damage_dealt = 0,was_switch_after_faint = False, input_number = 0) -> None:
@@ -755,6 +793,7 @@ class TurnActionSummary:
         self.target_fainted = False
         self.user_fainted = False
         self.user_had_to_recharge = False
+        self.user_was_fully_paralyzed = False
 
     def __str__(self) -> str:
         return f"Input number: {self.input_number}\nWas AI action: {self.was_ai_action}\nDamage dealt: {self.damage_dealt}\nUser missed: {self.user_missed}\nMove failed: {self.move_failed}\nMove was not very effective: {self.move_was_not_very_effective}\nWas effect move: {self.was_effect_move}\nWas attacking move: {self.was_attacking_move}\nWas switch: {self.was_switch}\nWas struggle: {self.was_struggle}\nWas switch after faint: {self.was_switch_after_faint}\nTarget fainted: {self.target_fainted}\nUser fainted: {self.user_fainted}\n"
@@ -763,6 +802,9 @@ class TurnActionSummary:
         if self.was_attacking_move and self.damage_dealt == 0:
             return True
         return False
+
+    def record_as_paralyzed(self):
+        self.user_was_fully_paralyzed = True
 
     def record_user_recharging(self):
         self.user_had_to_recharge = True

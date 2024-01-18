@@ -40,7 +40,7 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
     while player_team.has_non_fainted_members() and ai_team.has_non_fainted_members(): # Match loop
         if player_team.get_active_member().fainted: # Make player choose a valid new active member
             print(player_team)
-            player_choice = gm.switch_menu(team_members=player_team.get_list_of_member_names_to_switch_to(),valid_switch_indices=player_team.get_list_of_valid_switch_indices(), Back=False) # FIXME: Implement player choice
+            player_choice = gm.switch_menu(team_members=player_team.get_list_of_members_to_switch_to(),valid_switch_indices=player_team.get_list_of_valid_switch_indices(), Back=False) # FIXME: Implement player choice
             switch_after_fainting(player_team, player_choice - 4)
         if ai_team.get_active_member().fainted: # Make AI choose a valid new active member
             current_game_state = GameState(player_team, ai_team)
@@ -201,5 +201,24 @@ def switch_menu_game(random_ai=False):
     ai_team.add_member(Monster(LILLIPUP, 2))
     match_result = match(player_team, ai_team, random_ai=random_ai)
 
-switch_menu_game(random_ai=False)
+def super_fang_game(random_ai = False):
+    # Match between two watchogs
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(WATCHOG, 15))
+    player_team.add_member(Monster(WATCHOG, 15))
+    ai_team.add_member(Monster(WATCHOG, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
+
+def paralysis_game(random_ai = False):
+    # Match between two emolga
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(EMOLGA, 15))
+    player_team.add_member(Monster(EMOLGA, 15))
+    ai_team.add_member(Monster(EMOLGA, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
+
+paralysis_game(random_ai = False)
+#super_fang_game(random_ai = False)
 #infinite_game()

@@ -97,7 +97,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 96,Sand Attack,Ground,Effect,0,100,15,101,0,Lower_Accuracy,0,N,S,Lowers target's accuracy.,-,,,
 97,Gust,Flying,Special,40,100,35,0,0,None,0,N,S,,-,,,
 98,Peck,Flying,Special,35,100,35,0,0,None,0,N,S,,-,,,
-99,Roost,Flying,Effect,0,101,5,101,0,Heal_User,0,N,U,Heals user.,-,,,
+99,Roost,Flying,Effect,0,101,5,101,0,Heal_User,50,N,U,Heals user.,-,,,
 100,Wing Attack,Flying,Physical,60,100,35,0,0,None,0,N,S,,-,,,
 101,Air Slash,Flying,Special,75,95,25,30,0,Flinch,0,N,S,Chance to cause target to flinch.,-,,,
 102,Aerial Ace,Flying,Physical,60,101,20,0,0,None,0,Y,S,This move never misses.,R,,,
