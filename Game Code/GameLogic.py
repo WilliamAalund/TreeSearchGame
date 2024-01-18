@@ -54,7 +54,7 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
             switch_after_fainting(ai_team, ai_choice - 4)
         print("-----------------------------------------")   
         gm.battle_scene(player_team, ai_team)
-        uinp = gm.battle_menu_input(player_team.get_member(player_team.active_member_index).get_list_of_moves(), player_team.get_list_of_member_names_to_switch_to(), player_team.get_list_of_valid_switch_indices())
+        uinp = gm.battle_menu_input(player_team.get_member(player_team.active_member_index).get_list_of_moves(), player_team.get_list_of_members_to_switch_to(), player_team.get_list_of_valid_switch_indices())
         print("-----------------------------------------")    
         if uinp == 10: # FIXME: Implement player losing by running away
             print("Player ran away!")
@@ -184,4 +184,22 @@ def behavior_game(random_ai = False):
     ai_team.add_member(Monster(SEISMITOAD, 15))
     match_result = match(player_team, ai_team, random_ai=random_ai)
 
-infinite_game()
+def gear_shift_game(random_ai=False):
+    # Match between a klinklang and a serperior
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(KLINKLANG, 15))
+    ai_team.add_member(Monster(KLINKLANG, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
+
+def switch_menu_game(random_ai=False):
+    # Match between a team of three starters, and a lillipup
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(SAMUROTT, 15))
+    player_team.add_member(Monster(LILLIPUP, 15))
+    ai_team.add_member(Monster(LILLIPUP, 2))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
+
+switch_menu_game(random_ai=False)
+#infinite_game()

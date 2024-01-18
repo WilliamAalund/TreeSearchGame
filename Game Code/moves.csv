@@ -1,6 +1,6 @@
 NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFFECT,EFFECT_MAGNITUDE,CONTACT,TARGET,DESCRIPTION,IS_ITEM,NOT_IMPLEMENTED,,EFFECT
 1,Tackle,Normal,Physical,40,100,35,0,0,None,0,Y,S,,-,,,None
-2,Double Slap,Normal,Physical,15,85,10,101,0,Multi_Hit,5,Y,S,Hits opponent 2 - 5 times in a row.,-,,,Multi_Hit
+2,Double Slap,Normal,Physical,15,85,10,101,0,Multi_Hit,5,Y,S,Hits the target 2 - 5 times in a row.,-,,,Multi_Hit
 3,Quick Attack,Normal,Physical,40,100,30,0,1,None,0,Y,S,User attacks first.,-,,,High_Crit
 4,Swift,Normal,Special,60,101,20,0,0,None,0,N,D,This move never misses.,R,,,Halve_HP
 5,Slash,Normal,Physical,70,100,20,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,R,,,Paralyze
@@ -8,8 +8,8 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 7,Body Slam,Normal,Physical,85,100,15,10,0,Paralyze,0,Y,S,Chance to paralyze the target.,-,,,Recharge
 8,Double-Edge,Normal,Physical,120,100,15,101,0,Recoil,0,Y,S,Damages the user a lot.,M,,,Alter_Attack
 9,Hyper Beam,Normal,Special,150,90,5,101,0,Recharge,0,N,S,The user must recharge after use.,M,,,Alter_Defense
-10,Growl,Normal,Effect,0,100,40,101,0,Alter_Physical_Attack,-1,N,D,Lowers opponent's attack.,-,,,Alter_Attack_User
-11,Leer,Normal,Effect,0,100,30,101,0,Alter_Physical_Defense,-1,N,S,Lowers opponent's defense.,-,,,Heal_User
+10,Growl,Normal,Effect,0,100,40,101,0,Alter_Physical_Attack,-1,N,D,Lowers the target's attack.,-,,,Alter_Attack_User
+11,Leer,Normal,Effect,0,100,30,101,0,Alter_Physical_Defense,-1,N,S,Lowers the target's defense.,-,,,Heal_User
 12,Growth,Normal,Effect,0,101,20,101,0,Alter_Special_Attack_User,1,N,U,Raises user's special attack.,M,,,Reset_Status_User
 13,Swords Dance,Normal,Effect,0,101,20,101,0,Alter_Physical_Attack_User,2,N,U,Sharply raises user's attack.,M,,,Burn
 14,Work Up,Normal,Effect,0,101,30,101,0,Alter_Physical_Attack_Special_Attack_User,1,N,U,Raises the user's attack and special attack.,,,,
@@ -71,7 +71,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 70,Power-Up Punch,Fighting,Physical,40,100,20,101,0,Alter_Physical_Attack_User,1,Y,S,Raises user's attack.,M,,,
 71,Aura Sphere,Fighting,Special,80,101,20,0,0,None,0,N,S,,M,,,
 72,Counter,Fighting,Effect,0,101,20,101,0,Counter,0,Y,S,"When hit by a physical attack, the user strikes back with double power.",R,,,
-73,Superpower,Fighting,Physical,120,100,5,101,0,Alter_Physical_Attack_Physical_Defense_User,-1,Y,S,Lowers user's attack and defense.,M,,,
+73,Superpower,Fighting,Physical,120,100,5,101,0,Alter_Physical_Attack_Physical_Defense_User,-1,Y,S,Lowers the user's attack and defense.,M,,,
 74,Close Combat,Fighting,Physical,120,100,5,101,0,Alter_Physical_Defense_Special_Defense,-1,Y,S,,M,,,
 75,Focus Punch,Fighting,Physical,150,100,20,101,8,Tighten_Focus,0,Y,S,"The user tightens its focus. If it is not attacked, it will attack after all other moves.",-,,,
 76,Hammer Arm,Fighting,Physical,100,90,10,101,0,Alter_Speed_User,-1,Y,S,Lowers user's speed.,M,,,
@@ -81,7 +81,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 80,Acid,Poison,Special,40,100,30,10,0,Alter_Special_Defense,-1,N,S,May lower the target's special defense.,R,,,
 81,Acid Spray,Poison,Special,40,100,20,101,0,Alter_Special_Defense,-2,N,S,Sharply lowers the target's special defense.,M,,,
 82,Coil,Poison,Effect,0,101,20,101,0,Alter_Physical_Attack_Physical_Defense_Accuracy_User,1,N,U,"Raises the user's attack, defense and accuracy.",R,,,
-83,Poison Powder,Poison,Effect,0,75,35,101,0,Poison,0,N,S,Poisons opponent.,N,,,
+83,Poison Powder,Poison,Effect,0,75,35,101,0,Poison,0,N,S,Poisons the target.,N,,,
 84,Sludge,Poison,Special,65,100,20,30,0,Poison,0,N,S,Chance to poison the target.,R,,,
 85,Sludge Bomb,Poison,Special,90,100,10,30,0,Poison,0,N,S,Chance to poison the target.,M,,,
 86,Toxic,Poison,Effect,0,90,10,101,0,Badly_Poison,0,N,S,Badly poisons the target.,M,,,
@@ -91,8 +91,8 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 90,Earth Power,Ground,Special,90,100,10,10,0,Lower_Special_Defense,0,N,S,May lower the target's special defense.,M,,,
 91,Earthquake,Ground,Physical,100,100,10,0,0,None,0,N,S,,M,,,
 92,Bulldoze,Ground,Physical,60,20,20,101,0,Lower_Speed,0,N,S,Lowers the target's speed.,R,,,
-93,Sand Tomb,Ground,Physical,35,85,15,101,0,Sand_Tomb_Trap,0,N,S,"Traps opponent, damaging them for 4-5 turns.",R,,,
-94,Bone Rush,Ground,Physical,25,90,10,101,0,Multi_Hit,5,Y,S,Hits opponent 2 - 5 times in a row.,M,,,
+93,Sand Tomb,Ground,Physical,35,85,15,101,0,Sand_Tomb_Trap,0,N,S,"Traps the target, damaging them for 4-5 turns.",R,,,
+94,Bone Rush,Ground,Physical,25,90,10,101,0,Multi_Hit,5,Y,S,Hits the target 2 - 5 times in a row.,M,,,
 95,Drill Run,Ground,Physical,80,95,10,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,M,,,
 96,Sand Attack,Ground,Effect,0,100,15,101,0,Lower_Accuracy,0,N,S,Lowers target's accuracy.,-,,,
 97,Gust,Flying,Special,40,100,35,0,0,None,0,N,S,,-,,,
@@ -113,7 +113,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 112,Calm Mind,Psychic,Effect,0,101,20,101,0,Alter_Special_Attack_Special_Defense_User,1,N,U,Raises the user's special attack and special defense.,M,,,
 113,Rest,Psychic,Effect,0,101,5,101,0,Rest,0,N,U,"User is fully healed, but falls asleep.",M,T,,
 114,Agility,Psychic,Effect,0,101,30,101,0,Alter_Speed_User,2,N,U,Sharply raises the user's speed.,R,,,
-115,Pin Missle,Bug,Physical,25,95,20,101,0,Multi_Hit,5,N,S,Hits opponent 2 - 5 times in a row.,-,,,
+115,Pin Missle,Bug,Physical,25,95,20,101,0,Multi_Hit,5,N,S,Hits the target 2 - 5 times in a row.,-,,,
 116,Megahorn,Bug,Physical,120,85,10,0,0,None,0,Y,S,,M,,,
 117,Signal Beam,Bug,Special,75,100,15,10,0,Confuse,0,N,S,Chance to confuse the target.,M,,,
 118,X-Scissor,Bug,Physical,80,100,15,0,0,None,0,Y,S,,M,,,
@@ -143,7 +143,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 142,Crunch,Dark,Physical,80,100,15,20,0,Alter_Physical_Defense,-1,Y,S,Chance to lower the target's defense.,-,,,
 143,Dark Pulse,Dark,Special,80,100,15,20,0,Flinch,0,N,S,Chance to cause target to flinch.,M,,,
 144,Snarl,Dark,Special,55,95,15,101,0,Alter_Special_Attack,-1,N,S,Chance to lower the target's special attack.,R,,,
-145,Taunt,Dark,Effect,0,100,20,101,0,Prevent_Effect_Moves,0,N,S,Opponent can only use moves that attack.,R,T,,
+145,Taunt,Dark,Effect,0,100,20,101,0,Prevent_Effect_Moves,0,N,S,"Enrages the target, causing it to only use moves that attack.",R,T,,
 146,Night Slash,Dark,Physical,70,100,15,12.5,0,High_Crit,0,Y,S,High critical hit ratio.,M,,,
 147,Gear Grind,Steel,Physical,50,85,15,101,0,Multi_Hit,2,Y,S,Hits the target twice in a row.,-,,,
 148,Iron Tail,Steel,Physical,100,75,15,30,0,Alter_Defense,-1,Y,S,Chance to loer the target's defense.,M,,,

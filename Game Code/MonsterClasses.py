@@ -43,6 +43,7 @@ class Monster: #TODO: set up move database for each monster
         self.accuracy_boost = 0
         self.evasion_boost = 0
         self.crit_chance = 0
+        self.must_recharge = False
 
         if deep_copy:
             self.name = deep_copy.name
@@ -202,35 +203,39 @@ class Monster: #TODO: set up move database for each monster
                 print("Monster not found, object is invalid")
     
     def __str__(self) -> str:
-        stats = f"HP: {self.HP}\nAttack: {self.attack}\nDefense: {self.defense}\nSpecial Attack: {self.special_attack}\nSpecial Defense: {self.special_defense}\nSpeed: {self.speed}"
+        stats = f"Attack: {self.attack} {'+' if self.get_nature_multiplier(ATTACK) > 1 else ''}{'-' if self.get_nature_multiplier(ATTACK) < 1 else ''}\nDefense: {self.defense} {'+' if self.get_nature_multiplier(DEFENSE) > 1 else ''}{'-' if self.get_nature_multiplier(DEFENSE) < 1 else ''}\nSpecial Attack: {self.special_attack} {'+' if self.get_nature_multiplier(SP_ATTACK) > 1 else ''}{'-' if self.get_nature_multiplier(SP_ATTACK) < 1 else ''}\nSpecial Defense: {self.special_defense} {'+' if self.get_nature_multiplier(SP_DEFENSE) > 1 else ''}{'-' if self.get_nature_multiplier(SP_DEFENSE) < 1 else ''}\nSpeed: {self.speed} {'+' if self.get_nature_multiplier(SPEED) > 1 else ''}{'-' if self.get_nature_multiplier(SPEED) < 1 else ''}"
         if self.move_1:
-            stats += f"\n{self.move_1.name} (PP: {self.move_1.pp})"
+            stats += f"\n{self.move_1}"
         else:
-            stats += "\n - "
+            stats += "\n --- "
         if self.move_2:
-            stats += f" {self.move_2.name} (PP: {self.move_2.pp})"
+            stats += f"\n{self.move_2}"
         else:
-            stats += " - "
+            stats += "\n --- "
         if self.move_3:
-            stats += f" {self.move_3.name} (PP: {self.move_3.pp})"
+            stats += f"\n{self.move_3}"
         else:
-            stats += " - "
+            stats += "\n --- "
         if self.move_4:
-            stats += f" {self.move_4.name} (PP: {self.move_4.pp})"
+            stats += f"\n{self.move_4}"
         else:
-            stats += " - "
-        return f"Name: {self.name}\n{stats}"
+            stats += "\n --- "
+        return f"\n{self.name} | Lv.{self.level} | HP: {self.HP}/{self.max_HP} | {self.type_1} {self.type_2 + ' ' if self.type_2 else ''}| {self.nature}\n{stats}\n"
     
     def get_list_of_moves(self):
         moves = []
         if self.move_1:
-            moves.append(self.move_1.name)
+            move_text = self.move_1.name + " PP: " + str(self.move_1.pp) + "/" + str(self.move_1.base_pp)
+            moves.append(move_text)
         if self.move_2:
-            moves.append(self.move_2.name)
+            move_text = self.move_2.name + " PP: " + str(self.move_2.pp) + "/" + str(self.move_2.base_pp)
+            moves.append(move_text)
         if self.move_3:
-            moves.append(self.move_3.name)
+            move_text = self.move_3.name + " PP: " + str(self.move_3.pp) + "/" + str(self.move_3.base_pp)
+            moves.append(move_text)
         if self.move_4:
-            moves.append(self.move_4.name)
+            move_text = self.move_4.name + " PP: " + str(self.move_4.pp) + "/" + str(self.move_4.base_pp)
+            moves.append(move_text)
         return moves
 
     def reset_boosts(self):
@@ -242,6 +247,7 @@ class Monster: #TODO: set up move database for each monster
         self.accuracy_boost = 0
         self.evasion_boost = 0
         self.crit_chance = 0
+        self.must_recharge = False
 
     def get_boost_for_stat(self, stat):
         if stat == ATTACK:
@@ -299,6 +305,9 @@ class Monster: #TODO: set up move database for each monster
             return 0.25
         else:
             return 1
+
+    def set_recharge(self):
+        self.must_recharge = not self.must_recharge
 
     def set_boost_for_stat(self, stat, boost): # Sets the boost value for a particular stat
         if stat == ATTACK:
@@ -555,7 +564,7 @@ def generated_monster(id = 0, level_parameter = 1): #TODO: Implement monster gen
 if __name__ == "__main__":
     TestMonster = Monster(501, 50)
     TestMonster2 = Monster(501, 50)
-    print(TestMonster.get_strongest_move_against(TestMonster2))
+    print(TestMonster)
 
 
 VICTINI = 494

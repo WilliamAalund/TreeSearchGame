@@ -78,7 +78,7 @@ def generic_input(input_message = "Enter input { ", action_1 = "continue", actio
         elif uinp == "m" and action_7_available:
             return 6
 
-def switch_menu(input_message = "Choose a Pokemon.", team_members=[], valid_switch_indices=[], Back = True):
+def switch_menu(input_message = "Choose a Pokemon.", team_members=[], valid_switch_indices=[], Back = True): # Team members is a list of Monster objects
     uinp = -1
     if Back:
         able_to_back = "Back"
@@ -92,17 +92,17 @@ def switch_menu(input_message = "Choose a Pokemon.", team_members=[], valid_swit
             switch_input = -1
             input_message = input_message
             if len(valid_switch_indices) == 6:
-                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], team_members[4], team_members[5], able_to_back)
+                switch_input = generic_input(input_message, team_members[0].name, team_members[1].name, team_members[2].name, team_members[3].name, team_members[4].name, team_members[5].name, able_to_back)
             elif len(valid_switch_indices) == 5:
-                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], team_members[4], able_to_back)
+                switch_input = generic_input(input_message, team_members[0].name, team_members[1].name, team_members[2].name, team_members[3].name, team_members[4].name, able_to_back)
             elif len(valid_switch_indices) == 4:
-                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], team_members[3], able_to_back)
+                switch_input = generic_input(input_message, team_members[0].name, team_members[1].name, team_members[2].name, team_members[3].name, able_to_back)
             elif len(valid_switch_indices) == 3:
-                switch_input = generic_input(input_message, team_members[0], team_members[1], team_members[2], able_to_back)
+                switch_input = generic_input(input_message, team_members[0].name, team_members[1].name, team_members[2].name, able_to_back)
             elif len(valid_switch_indices) == 2:
-                switch_input = generic_input(input_message, team_members[0], team_members[1], able_to_back)
+                switch_input = generic_input(input_message, team_members[0].name, team_members[1].name, able_to_back)
             elif len(valid_switch_indices) == 1:
-                switch_input = generic_input(input_message, team_members[0], able_to_back)
+                switch_input = generic_input(input_message, team_members[0].name, able_to_back)
             else:
                 print("You have no other Pokemon to switch to.")
                 in_menu = False
@@ -143,8 +143,13 @@ def battle_menu_input(active_member_moves, team_members, valid_switch_indices = 
                 input_message = "Choose a Pokemon."
                 switch_input = switch_menu(input_message, team_members, valid_switch_indices, True)
                 if switch_input in range(len(valid_switch_indices)):
-                    uinp = valid_switch_indices[int(switch_input)] + 4
-                    in_menu = False
+                    print(team_members[switch_input])
+                    affirm_input = generic_input("Switch to " + team_members[switch_input].name + "?", "Yes", "No")
+                    if affirm_input == 0:
+                        uinp = valid_switch_indices[int(switch_input)] + 4
+                        in_menu = False
+                    else:
+                        uinp = -1
                 # List team, then list options about team
             elif minp == 2: # Run
                 uinp = 10

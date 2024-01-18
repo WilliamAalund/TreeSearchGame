@@ -393,7 +393,7 @@ def turn(player_team: Team, player_choice, ai_team: Team, ai_choice, visualizati
     
 ###################################### TURN ACTION CLASS ######################################
 class TurnAction: # Used in turn function to organize actions that need to be taken
-    def __init__(self, user, user_team, uinp, target, target_team, was_ai_action, visualization = True, can_crit = True) -> None:
+    def __init__(self, user: Monster, user_team: Team, uinp, target: Monster, target_team: Team, was_ai_action, visualization = True, can_crit = True) -> None:
         self.was_ai_action = was_ai_action
         self.user = user
         self.user_team = user_team
@@ -420,7 +420,13 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
             print()
         if self.uinp <= MOVE_4:
             self.turn_action_summary.record_move_as_attacking_move()
-            if not self.user.fainted: # Check if user is fainted                
+            if not self.user.fainted: # Check if user is fainted   
+                if self.user.must_recharge:
+                    self.user.set_recharge()
+                    if self.visualization:
+                        print(self.user_team.name + "'s " + self.user.name + " must recharge!") 
+                    self.turn_action_summary.record_user_recharging()
+                    return self.turn_action_summary            
                 if self.move_used.pp == 0: # FIXME: This is running during the MTCS algorithm, but it shouldn't be
                     if self.visualization:
                         print("But it failed! Move is out of PP:",self.move_used.pp)
@@ -465,7 +471,11 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                     else: # None effect move, or move that hasn't been implemented
                         result = self.do_damage()   
                     if result:
-                        if self.move_used.effect == "Recoil":
+                        if self.move_used.effect == "Moderate_Recoil":
+                            recoil_result = self.moderate_recoil(result)
+                            if self.visualization:
+                                print(self.user_team.name + "'s " + self.user.name + " took " + str(recoil_result) + " damage from recoil!")
+                        elif self.move_used.effect == "Recoil":
                             recoil_result = self.recoil(result)
                             if self.visualization:
                                 print(self.user_team.name + "'s " + self.user.name + " took " + str(recoil_result) + " damage from recoil!")
@@ -474,9 +484,11 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                             self.heal_by_amount(result, heal_percentage)
                         elif "Alter" in self.move_used.effect:
                             self.alter_boosts()
-                    elif self.move_used.effect != "None":
-                        if self.visualization:
-                            print("Move's effect is not implemented")
+                        elif self.move_used.effect == "Recharge":
+                            self.user.set_recharge()
+                        elif self.move_used.effect != "None":
+                            if self.visualization:
+                                print("Move's effect is not implemented")
                     self.expend_pp()
                 else:
                     if self.move_used.effect == "Synthesis_Heal":
@@ -487,6 +499,8 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                     elif "Alter" in self.move_used.effect: # FIXME: Theres probably a better way to do this
                         self.alter_boosts()            
                         # Special exception for Gear Shift which raises attack by one stage and speed by two stages
+                    elif self.move_used.effect == "Shift_Gear":
+                        self.shift_gear()
                     else:
                         if self.visualization:
                             print("Status move's effect is not implemented")
@@ -521,6 +535,44 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
             return True
         else:
             return False
+
+    def shift_gear(self):
+        move_target = self.user
+        alter_attack_magnitude = 1
+        stat = ATTACK
+        stat_name = "Attack"
+        curr_boost = move_target.get_boost_for_stat(stat)
+        if curr_boost + alter_attack_magnitude > 6:
+            raised_amount = 6 - curr_boost
+        else:
+            raised_amount = alter_attack_magnitude
+        move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
+        if self.visualization:
+                    if raised_amount == 1:
+                        print(move_target.name + "'s " + stat_name + " rose!")
+                    elif raised_amount == 0:
+                        print(move_target.name + "'s " + stat_name + " couldn't get any higher!")
+                    else:
+                        print("Alter_Attack_User error")
+        alter_speed_magnitude = 2
+        stat = SPEED
+        stat_name = "Speed"
+        curr_boost = move_target.get_boost_for_stat(stat)
+
+        if curr_boost + alter_speed_magnitude > 6:
+            raised_amount = 6 - curr_boost
+        else:
+            raised_amount = alter_speed_magnitude
+        move_target.set_boost_for_stat(stat, curr_boost + raised_amount)
+        if self.visualization:
+            if raised_amount == 2:
+                print(move_target.name + "'s " + stat_name + " rose sharply!")
+            elif raised_amount == 1:
+                print(move_target.name + "'s " + stat_name + " rose!")
+            elif raised_amount == 0:
+                print(move_target.name + "'s " + stat_name + " couldn't get any higher!")
+            else:
+                print("Alter_Attack_User error")
 
     def alter_boosts(self):
         if "User" in self.move_used.effect: # If 'User' is in the effect string, set a variable to the user
@@ -600,6 +652,13 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                         print("Alter_Attack_User error")
             else:
                 print("Warning: Alter effect magnitude is 0")
+
+    def moderate_recoil(self, damage_dealt):
+        damage = math.floor(damage_dealt / 4)
+        self.user.HP -= damage
+        if self.user.HP <= 0:
+                self.set_user_fainted()
+        return damage
 
     def recoil(self, damage_dealt):
         damage = math.floor(damage_dealt / 3)
@@ -695,6 +754,7 @@ class TurnActionSummary:
         self.was_switch_after_faint = was_switch_after_faint
         self.target_fainted = False
         self.user_fainted = False
+        self.user_had_to_recharge = False
 
     def __str__(self) -> str:
         return f"Input number: {self.input_number}\nWas AI action: {self.was_ai_action}\nDamage dealt: {self.damage_dealt}\nUser missed: {self.user_missed}\nMove failed: {self.move_failed}\nMove was not very effective: {self.move_was_not_very_effective}\nWas effect move: {self.was_effect_move}\nWas attacking move: {self.was_attacking_move}\nWas switch: {self.was_switch}\nWas struggle: {self.was_struggle}\nWas switch after faint: {self.was_switch_after_faint}\nTarget fainted: {self.target_fainted}\nUser fainted: {self.user_fainted}\n"
@@ -703,6 +763,9 @@ class TurnActionSummary:
         if self.was_attacking_move and self.damage_dealt == 0:
             return True
         return False
+
+    def record_user_recharging(self):
+        self.user_had_to_recharge = True
 
     def record_move_failed(self):
         self.move_failed = True

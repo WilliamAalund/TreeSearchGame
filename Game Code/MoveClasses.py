@@ -69,7 +69,7 @@ class Move:
                 print("Move not found, object is invalid")
 
     def __str__(self) -> str:
-        return "Move: " + self.name + " | PP: " + str(self.pp) + "/" + str(self.base_pp) + "\nType: " + self.type + " | Category: " + self.category + "\nBase Power: " + str(self.base_power) + " | Accuracy: " + str(self.accuracy) + (("\n" + str(self.description)) if self.description else "")
+        return self.name + " | PP: " + str(self.pp) + "/" + str(self.base_pp) + " | " + self.type + " | " + self.category + " | Base Power: " + str(self.base_power) + " | Accuracy: " + (str(self.accuracy) if self.accuracy != 101 else "-") + " | " + ((str(self.description)) if self.description else "")
 
     def is_move_usable(self):
         if self.pp > 0:

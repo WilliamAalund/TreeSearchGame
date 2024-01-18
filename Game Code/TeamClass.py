@@ -40,6 +40,10 @@ class Team:
             print("Index: " + str(index))
             print("Team size: " + str(self.team_size))
 
+    def get_members(self):
+        print(len(self.team_members))
+        return self.team_members
+
     def get_active_member(self):
         return self.team_members[self.active_member_index]
 
@@ -79,6 +83,13 @@ class Team:
                 member_names.append(self.team_members[i].name)
         return member_names
 
+    def get_list_of_members_to_switch_to(self):
+        members = []
+        for i in range(self.team_size):
+            if i != self.active_member_index and not self.team_members[i].fainted:
+                members.append(self.team_members[i])
+        return members
+    
     def get_initial_active_member_index(self):
         for i in range(self.team_size):
             if not self.team_members[i].fainted:
