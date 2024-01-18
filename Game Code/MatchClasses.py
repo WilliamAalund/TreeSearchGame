@@ -46,13 +46,18 @@ TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1
               'Typeless':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':1, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1}}
 
 
+def quick_damage_calc(attacker_attack, attacker_attack_multiplier, attacker_level, defender_defense, defender_defense_multiplier, base_power, type_multiplier): 
+    raw_calc = ((((2*attacker_level / 5 + 2) * base_power * (attacker_attack / defender_defense)) / 50) + 2)
+    multiplier_calc = (raw_calc * type_multiplier * attacker_attack_multiplier) / defender_defense_multiplier
+    return math.ceil(multiplier_calc)
+
 def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_team, can_crit = True, visualization = True, is_struggle = False, crit_chance = DEFAULT_CRIT_CHANCE):
     if can_crit:
         roll = rng.randint(1,100)
         if roll < crit_chance:
             crit_mult = CRIT_MULTIPLIER
             if visualization:
-                print("Critical hit!", end="")
+                print("Critical hit!", end=" ")
         else:
             crit_mult = 1
     else:
@@ -224,20 +229,20 @@ class GameState():
             return False
 
     def get_victory_reward(self): # Number that represents magnitude by which the AI won.
-        victory_polish = 0
+        victory_reward = 0
         for action in self.last_turn_summary:
             if not action.was_ai_action and action.was_effect_move: # Invalidate victories where AI won because the player did not attack
-                victory_polish = -1
-                return victory_polish
+                victory_reward = -1
+                return victory_reward
         # Reward for victories with more hp left
-        victory_polish += 1 * (self.ai_team.get_active_member().get_stat(HP) / self.ai_team.get_active_member().get_stat(MAX_HP))
-        victory_polish += 2 * (1 - (self.turn_count / 5))
-        return victory_polish
+        victory_reward += 1 * (self.ai_team.get_active_member().get_stat(HP) / self.ai_team.get_active_member().get_stat(MAX_HP))
+        victory_reward += 2 * (1 - (self.turn_count / 5))
+        return victory_reward
     
-    def get_loss_reward(self):
-        loss_polish = 0
-        loss_polish += 1 *  (1 - (self.player_team.get_active_member().get_stat(HP) / self.player_team.get_active_member().get_stat(MAX_HP)))
-        return loss_polish
+    def get_loss_penalty(self):
+        loss_penalty = 0
+        return loss_penalty
+
     
     def get_valid_switches_for_team(self, team: Team):
         list_of_ai_choices = []
@@ -305,7 +310,7 @@ class GameState():
 
     
     def advance_game(self, ai_choice, player_choice = 0): # Simulates moving game forward. Will flip switch booleans and if both are False, will run turn
-        if self.ai_needs_to_switch  and not self.did_elimination_occur(): # If ai needs to switch, change the active monster according to the ai_choice
+        if self.ai_needs_to_switch and not self.did_elimination_occur(): # If ai needs to switch, change the active monster according to the ai_choice
             self.ai_team.switch_active_member(ai_choice - 4) 
             self.ai_needs_to_switch = False
             self.last_turn_summary = [TurnActionSummary(was_ai_action=True,was_switch_after_faint=True)]

@@ -9,9 +9,9 @@ def infinite_game():
     player_lost = False
     player_wins = 0
     player_team = Team("Player")
-    player_team.add_member(Monster(497, trainer_level))
-    player_team.add_member(Monster(500, trainer_level))
-    player_team.add_member(Monster(503, trainer_level))
+    player_team.add_member(Monster(SERPERIOR, trainer_level))
+    player_team.add_member(Monster(EMBOAR, trainer_level))
+    player_team.add_member(Monster(SAMUROTT, trainer_level))
     while not player_lost:
         enemy_team = generate_enemy_team(member_count=3)
         match_result = match(player_team, enemy_team)
@@ -19,9 +19,9 @@ def infinite_game():
             player_lost = True
             print("Player lost")
         else:
-            print("Player won")
+            print("\033[33mPlayer won")
             player_wins += 1
-            print("Player wins: " + str(player_wins))
+            print("Player wins: " + str(player_wins),"\033[0m")
         player_team.fully_heal_team()
         
 def generate_enemy_team(member_count = 3):
@@ -30,7 +30,7 @@ def generate_enemy_team(member_count = 3):
     if num_team_members == 1:
         print("Invalid member count: setting to one")
     for i in range(num_team_members):
-        enemy_team.add_member(Monster(rng.randint(494,567), trainer_level))
+        enemy_team.add_member(Monster(rng.randint(494,620), trainer_level))
     return enemy_team
 
 def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=False, verbose_MTCS=False): # Runs a match between two teams. Returns 1 if player won, 0 if AI won
@@ -44,7 +44,10 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
             switch_after_fainting(player_team, player_choice - 4)
         if ai_team.get_active_member().fainted: # Make AI choose a valid new active member
             current_game_state = GameState(player_team, ai_team)
-            if random_ai == True:
+            # If the ai only has one valid switch, then make it choose that without using MCTS
+            if len(ai_team.get_list_of_valid_switch_indices()) == 1:
+                ai_choice = ai_team.get_list_of_valid_switch_indices()[0] + 4
+            elif random_ai == True:
                 ai_choice = rng.choice(ai_team.get_list_of_valid_switch_indices()) + 4
             else:
                 ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=random_ai_policy).get_best_move()
@@ -170,5 +173,15 @@ def bug_game(random_ai = False, verbose_MTCS=False): # FIXED: Bug where AI takin
     player_team.add_member(Monster(EMBOAR, 50))
     ai_team.add_member(Monster(AUDINO, 50))
     match_result = match(player_team, ai_team, random_ai=random_ai, verbose_MTCS=verbose_MTCS)
+
+
+def behavior_game(random_ai = False):
+    # Match between a superior against a drillbur and a seismitoad
+    player_team = Team("Player")
+    ai_team = Team("Enemy")
+    player_team.add_member(Monster(SERPERIOR, 15))
+    ai_team.add_member(Monster(DRILBUR, 15))
+    ai_team.add_member(Monster(SEISMITOAD, 15))
+    match_result = match(player_team, ai_team, random_ai=random_ai)
 
 infinite_game()

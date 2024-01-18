@@ -42,7 +42,7 @@ class MonteCarloTreeSearch:
         if node.is_game_won(): # Not game agnostic, score returned is based on number of turns taken to win
             return 1 + node.state.get_victory_reward()
         else:
-            return 0 + node.state.get_loss_reward()
+            return 0 + node.state.get_loss_penalty()
 
     def backpropagate_tree(self, node, result):
         node.update_stats(result)

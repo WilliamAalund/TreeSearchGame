@@ -157,7 +157,15 @@ def battle_scene(player_team, ai_team):
     print("Lv." + str(player_team.get_member(player_team.active_member_index).level) + " ", end="")
     print(player_team.get_member(player_team.active_member_index).name, end="")
     print(" " + player_team.get_member(player_team.active_member_index).status if player_team.get_member(player_team.active_member_index).status else "", end="")
-    print(" " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="") 
+    player_percent_health = round((player_team.get_member(player_team.active_member_index).get_stat(HP) / player_team.get_active_member().get_stat(MAX_HP)) * 100, 1)
+    if player_percent_health > 50:
+        print(" " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")
+    elif player_percent_health > 25:
+        # Color text yellow
+        print("\33[33m " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="\033[0m")
+    else:
+        # Color text red
+        print("\33[31m " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="\033[0m")    
     print(" | Opponent: ", end="")
     print("Lv." + str(ai_team.get_member(ai_team.active_member_index).level) + " ", end="")
     print(ai_team.get_member(ai_team.active_member_index).name, end=" ")
