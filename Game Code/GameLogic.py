@@ -2,8 +2,58 @@ from MatchClasses import *
 from MonteCarlo import MonteCarloTreeSearch
 from PlayerClass import Player
 
+def exclusive_total():
+    return genie_exclusive + forest_exclusive_1 + forest_exclusive_2 + town_exclusive + mountain_exclusive + fossil_exclusive + rugged_exclusive
 
-trainer_level = 50
+trainer_level = 4
+player_level = 5
+wild_level = 5
+genie_exclusive = rng.randint(0,1)
+forest_exclusive_1 = rng.randint(0,1)
+forest_exclusive_2 = rng.randint(0,1)
+town_exclusive = rng.randint(0,1)
+mountain_exclusive = rng.randint(0,1)
+fossil_exclusive = rng.randint(0,1)
+rugged_exclusive = rng.randint(0,1)
+legendary_exclusive = None
+if exclusive_total() < 4:
+    legendary_exclusive = 0
+elif exclusive_total() > 4:
+    legendary_exclusive = 1
+else:
+    legendary_exclusive = rng.randint(0,1)
+
+def player_starter_selection():
+    pass
+
+def generate_wild_team():
+    pass
+
+def generate_trainer_team():
+    pass
+
+def generate_map():
+    pass
+
+def explore_location():
+    pass
+
+# Pasture: contains pasture monsters
+# Forest: contains forest monsters
+# Road: contains town monsters
+# Town: contains a pokemon center
+# City: contains city monsters, and a pokemon center
+# Mountain: contains mountain monsters
+# Desert: contains desert monsters, and fossils
+# Cave: contains cave monsters
+# Gym: Contains a gym leader/powerful trainer
+
+def campaign_game():
+    # The real game
+    player_starter_selection()
+    generate_map()
+    pass
+
 
 def infinite_game():
     player_lost = False
@@ -12,8 +62,9 @@ def infinite_game():
     player_team.add_member(Monster(SERPERIOR, trainer_level))
     player_team.add_member(Monster(EMBOAR, trainer_level))
     player_team.add_member(Monster(SAMUROTT, trainer_level))
+    player_team.add_member(Monster(RESHIRAM,trainer_level))
     while not player_lost:
-        enemy_team = generate_enemy_team(member_count=3)
+        enemy_team = generate_enemy_team()
         match_result = match(player_team, enemy_team)
         if match_result == 0:
             player_lost = True
@@ -24,13 +75,13 @@ def infinite_game():
             print("Player wins: " + str(player_wins),"\033[0m")
         player_team.fully_heal_team()
         
-def generate_enemy_team(member_count = 3):
+def generate_enemy_team(member_count = 4):
     enemy_team = Team("Enemy")
     num_team_members = member_count
     if num_team_members == 1:
         print("Invalid member count: setting to one")
     for i in range(num_team_members):
-        enemy_team.add_member(Monster(rng.randint(494,620), trainer_level))
+        enemy_team.add_member(Monster(rng.randint(494,649), trainer_level))
     return enemy_team
 
 def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=False, verbose_MTCS=False): # Runs a match between two teams. Returns 1 if player won, 0 if AI won
@@ -219,6 +270,6 @@ def paralysis_game(random_ai = False):
     ai_team.add_member(Monster(EMOLGA, 15))
     match_result = match(player_team, ai_team, random_ai=random_ai)
 
-paralysis_game(random_ai = False)
+#paralysis_game(random_ai = False)
 #super_fang_game(random_ai = False)
-#infinite_game()
+infinite_game()

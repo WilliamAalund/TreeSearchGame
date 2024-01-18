@@ -26,7 +26,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 25,Sunny Day,Fire,Effect,0,101,5,101,0,Set_Sun,0,N,U,Makes the weather sunny.,M,,,Raise_Defense_User
 26,Will-O-Wisp,Fire,Effect,0,85,15,101,0,Burn,0,N,S,Burns the target.,M,,,Charge
 27,V-create,Fire,Physical,180,95,5,101,0,Alter_Physical_Defense_Special_Defense_Speed_User,-1,N,S,"Lowers the user's defense, special defense, and speed.",-,,,Fusion_Bolt_Effect
-28,Fusion Flare,Fire,Special,100,100,5,101,0,Fusion_Flare_Effect,0,N,S,Power increases if Fusion Bolt is used in the same turn.,-,,,Heal_Damage
+28,Fusion Flare,Fire,Special,100,100,5,101,0,Fusion_Flare_Effect,0,N,S,Power increases if Fusion Bolt is used on the same turn.,-,,,Heal_Damage
 29,Water Gun,Water,Special,40,100,25,0,0,None,0,N,S,,-,,,Damage_Based_On_Weight
 30,Surf,Water,Special,90,100,15,0,0,None,0,N,D,,M,,,Sleep
 31,Hydro Pump,Water,Special,110,80,5,0,0,None,0,N,S,,M,,,Synthesis_Heal
@@ -44,7 +44,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 43,Wild Charge,Electric,Physical,90,100,15,101,0,Moderate_Recoil,25,Y,S,Damages the user a little.,M,,,Used_Defense_Is_Defense
 44,Thunder Wave,Electric,Effect,0,90,20,101,0,Paralyze,1,N,,,M,,,
 45,Charge,Electric,Effect,0,101,20,101,0,Charge,1,N,U,Raises user's special defense. Electric moves are stronger next turn.,M,,,
-46,Fusion Bolt,Electric,Physical,100,100,5,101,0,Fusion_Bolt_Effect,1,N,S,Power increases if Fusion Flare is used in the same turn.,-,,,
+46,Fusion Bolt,Electric,Physical,100,100,5,101,0,Fusion_Bolt_Effect,1,N,S,Power increases if Fusion Flare is used on the same turn.,-,,,
 47,Charge Beam,Electric,Special,50,90,10,70,0,Alter_Special_Attack_User,1,N,S,Chance to raise user's special attack.,M,,,
 48,Absorb,Grass,Special,20,100,25,101,0,Heal_Damage,50,N,S,User recovers hald the damage inflicted on target.,-,,,
 49,Vine Whip,Grass,Physical,45,100,25,0,0,None,0,N,S,,-,,,
@@ -97,7 +97,7 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 96,Sand Attack,Ground,Effect,0,100,15,101,0,Lower_Accuracy,0,N,S,Lowers target's accuracy.,-,,,
 97,Gust,Flying,Special,40,100,35,0,0,None,0,N,S,,-,,,
 98,Peck,Flying,Special,35,100,35,0,0,None,0,N,S,,-,,,
-99,Roost,Flying,Effect,0,101,5,101,0,Heal_User,50,N,U,Heals user.,-,,,
+99,Roost,Flying,Effect,0,101,5,101,0,Heal_User,50,N,U,Heals the user.,-,,,
 100,Wing Attack,Flying,Physical,60,100,35,0,0,None,0,N,S,,-,,,
 101,Air Slash,Flying,Special,75,95,25,30,0,Flinch,0,N,S,Chance to cause target to flinch.,-,,,
 102,Aerial Ace,Flying,Physical,60,101,20,0,0,None,0,Y,S,This move never misses.,R,,,

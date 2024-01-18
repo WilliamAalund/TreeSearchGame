@@ -39,8 +39,24 @@ NATURE_DICT = {'Hardy': (ATTACK, ATTACK), 'Lonely': (ATTACK, DEFENSE), 'Adamant'
               'Calm': (SP_DEFENSE, ATTACK), 'Gentle': (SP_DEFENSE, DEFENSE), 'Careful': (SP_DEFENSE, SP_ATTACK), 'Quirky': (SP_DEFENSE, SP_DEFENSE), 'Sassy': (SP_DEFENSE, SPEED),
               'Timid': (SPEED, ATTACK), 'Hasty': (SPEED, DEFENSE), 'Jolly': (SPEED, SP_ATTACK), 'Naive': (SPEED, SP_DEFENSE), 'Serious': (SPEED, SPEED)}
 
+EVOLVE_VIA_TRADE = 'T'
+EVOLVE_VIA_LEAF_STONE = 'LS'
+EVOLVE_VIA_FIRE_STONE = 'FS'
+EVOLVE_VIA_WATER_STONE = 'WS'
+EVOLVE_VIA_THUNDER_STONE = 'TS'
+EVOLVE_VIA_MOON_STONE = 'MS'
+EVOLVE_VIA_DUSK_STONE = 'DS'
+EVOLVE_VIA_SUN_STONE = 'SU'
+EVOLVE_VIA_ICE_STONE = 'IS'
+EVOLVE_VIA_SHINY_STONE = 'SH'
+EVOLVE_VIS_DUSTY_BOWL = 'DB'
+EVOLVE_VIA_FRIENDSHIP = 'FR'
+
+UNIQUE_EVOLUTION_METHODS = [EVOLVE_VIA_TRADE, EVOLVE_VIA_LEAF_STONE, EVOLVE_VIA_FIRE_STONE, EVOLVE_VIA_WATER_STONE, EVOLVE_VIA_THUNDER_STONE, EVOLVE_VIA_MOON_STONE, EVOLVE_VIA_DUSK_STONE, EVOLVE_VIA_SUN_STONE, EVOLVE_VIA_ICE_STONE, EVOLVE_VIA_SHINY_STONE, EVOLVE_VIS_DUSTY_BOWL, EVOLVE_VIA_FRIENDSHIP]
+
+
 class Monster: #TODO: set up move database for each monster
-    def __init__(self, number_id=1, level=1, code=1, deep_copy=None) -> None:
+    def __init__(self, number_id=1, level=1, code=1, deep_copy=None, perfect_IVs = False) -> None:
         
         self.attack_boost = 0
         self.defense_boost = 0
@@ -53,6 +69,8 @@ class Monster: #TODO: set up move database for each monster
         self.must_recharge = False
 
         if deep_copy:
+            self.id = deep_copy.id
+            self.code = deep_copy.code
             self.name = deep_copy.name
             self.not_fainted = deep_copy.not_fainted
             self.fainted = deep_copy.fainted
@@ -108,12 +126,15 @@ class Monster: #TODO: set up move database for each monster
             self.base_speed = deep_copy.base_speed
             self.can_evolve = deep_copy.can_evolve
             self.evolution_method = deep_copy.evolution_method
+            self.evolve_id = deep_copy.evolve_id
             self.learn_set = deep_copy.learn_set
 
 
             return
         else:
             # Monster stats
+            self.id = None
+            self.code = code
             self.name = None
             self.not_fainted = True
             self.fainted = False
@@ -164,6 +185,7 @@ class Monster: #TODO: set up move database for each monster
             self.base_speed = None
             self.can_evolve = None
             self.evolution_method = None
+            self.evolve_id = None
 
             monster_data = None  # Variable to store the matched row
             with open('monsters.csv', 'r') as file:
@@ -175,6 +197,7 @@ class Monster: #TODO: set up move database for each monster
 
             # Use the monster_data variable to calculate stats about the monster
             if monster_data is not None:
+                self.id = monster_data[0]
                 self.name = monster_data[3]
                 self.type_1 = monster_data[4]
                 if not self.type_1:
@@ -196,8 +219,17 @@ class Monster: #TODO: set up move database for each monster
                 self.base_special_attack = int(monster_data[18])
                 self.base_special_defense = int(monster_data[19])
                 self.base_speed = int(monster_data[20])
+                self.evolution_method = monster_data[22]
+                if self.evolution_method:
+                    self.can_evolve = True
+                else:
+                    self.can_evolve = False
+                self.evolve_id = monster_data[23]
                 self.roll_nature()
-                self.roll_IVs()
+                if perfect_IVs:
+                    self.roll_IVs(31)
+                else:
+                    self.roll_IVs()
                 self.calculate_stats()
                 self.HP = self.max_HP
                 self.learn_set = monster_data[24].split(',')
@@ -227,7 +259,7 @@ class Monster: #TODO: set up move database for each monster
             stats += f"\n{self.move_4}"
         else:
             stats += "\n --- "
-        return f"\n{self.name} | Lv.{self.level} | HP: {self.HP}/{self.max_HP} | {self.type_1} {self.type_2 + ' ' if self.type_2 else ''}| {self.nature}\n{stats}\n"
+        return f"\n{self.name} | Lv.{self.level} | HP: {self.HP}/{self.max_HP} | {self.type_1} {self.type_2 + ' ' if self.type_2 else ''}| {self.nature} | {('Evolution: ' + self.get_evolution_method()) if self.get_evolution_method() else ''}\n{stats}\n"
     
     def get_list_of_moves(self):
         moves = []
@@ -244,6 +276,39 @@ class Monster: #TODO: set up move database for each monster
             move_text = self.move_4.name + " PP: " + str(self.move_4.pp) + "/" + str(self.move_4.base_pp)
             moves.append(move_text)
         return moves
+
+    def get_evolution_method(self):
+        if self.evolution_method in UNIQUE_EVOLUTION_METHODS:
+            if self.evolution_method == EVOLVE_VIA_TRADE:
+                return "Trade"
+            elif self.evolution_method == EVOLVE_VIA_LEAF_STONE:
+                return "Leaf Stone"
+            elif self.evolution_method == EVOLVE_VIA_FIRE_STONE:
+                return "Fire Stone"
+            elif self.evolution_method == EVOLVE_VIA_WATER_STONE:
+                return "Water Stone"
+            elif self.evolution_method == EVOLVE_VIA_THUNDER_STONE:
+                return "Thunder Stone"
+            elif self.evolution_method == EVOLVE_VIA_MOON_STONE:
+                return "Moon Stone"
+            elif self.evolution_method == EVOLVE_VIA_DUSK_STONE:
+                return "Dusk Stone"
+            elif self.evolution_method == EVOLVE_VIA_SUN_STONE:
+                return "Sun Stone"
+            elif self.evolution_method == EVOLVE_VIA_ICE_STONE:
+                return "Ice Stone"
+            elif self.evolution_method == EVOLVE_VIA_SHINY_STONE:
+                return "Shiny Stone"
+            elif self.evolution_method == EVOLVE_VIS_DUSTY_BOWL:
+                return "Dusty Bowl"
+            elif self.evolution_method == EVOLVE_VIA_FRIENDSHIP:
+                return "Friendship"
+            else:
+                return "Unknown"
+        elif self.evolution_method.isnumeric():
+            return "Level " + self.evolution_method
+        else:
+            return ""
 
     def reset_boosts(self):
         self.attack_boost = 0
@@ -387,7 +452,6 @@ class Monster: #TODO: set up move database for each monster
             moves.append(STRUGGLE)
             return moves
 
-
     def get_list_of_valid_move_numbers(self): # Used in getting a list of valid moves to choose from in MatchClasses.py
         moves = []
         if self.move_1:
@@ -453,13 +517,13 @@ class Monster: #TODO: set up move database for each monster
                 print(f" (IV: {iv_value}, EV: {ev_value})", end='')
             print()
 
-    def roll_IVs(self):
-        self.IV_HP = rng.randint(0, 31)
-        self.IV_attack = rng.randint(0, 31)
-        self.IV_defense = rng.randint(0, 31)
-        self.IV_special_attack = rng.randint(0, 31)
-        self.IV_special_defense = rng.randint(0, 31)
-        self.IV_speed = rng.randint(0, 31)
+    def roll_IVs(self, floor = 0):
+        self.IV_HP = rng.randint(floor, 31)
+        self.IV_attack = rng.randint(floor, 31)
+        self.IV_defense = rng.randint(floor, 31)
+        self.IV_special_attack = rng.randint(floor, 31)
+        self.IV_special_defense = rng.randint(floor, 31)
+        self.IV_speed = rng.randint(floor, 31)
 
     def roll_nature(self):
         self.nature = rng.choice(list(NATURE_DICT.keys()))
@@ -557,10 +621,103 @@ class Monster: #TODO: set up move database for each monster
 
     def level_up(self): # Levels up the monster by 1
         if self.level < 100:
+            old_max_hp = self.max_HP
+            old_attack = self.attack
+            old_defense = self.defense
+            old_special_attack = self.special_attack
+            old_special_defense = self.special_defense
+            old_speed = self.speed
             self.level += 1
-            self.calculate_stats()  
+            self.calculate_stats() 
+            print(f"{self.name} leveled up to level {self.level}!")
+            print(f"HP: {old_max_hp} -> {self.max_HP}")
+            print(f"Attack: {old_attack} -> {self.attack}")
+            print(f"Defense: {old_defense} -> {self.defense}")
+            print(f"Special Attack: {old_special_attack} -> {self.special_attack}")
+            print(f"Special Defense: {old_special_defense} -> {self.special_defense}")
+            print(f"Speed: {old_speed} -> {self.speed}") 
+            print()
+            hp_difference = self.max_HP - old_max_hp
+            self.HP += hp_difference
+            if self.fainted:
+                self.fainted = False
+                self.not_fainted = True
+            if self.level_condition_met_to_evolve():
+                self.evolve()
             # Reset exp to 0
             # Calculate exp to next level, assign it to a parameter
+
+    def level_condition_met_to_evolve(self):
+        if self.evolution_method.isnumeric():
+            if self.level >= int(self.evolution_method):
+                return True
+        else:
+            return False
+
+    def evolve(self):
+        if self.evolve_id:
+            new_mon_id = self.evolve_id
+        else:
+            new_mon_id = str(int(self.id) + 1)
+        monster_data = None  # Variable to store the matched row
+        with open('monsters.csv', 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if row[0] == str(new_mon_id) and row[1] == str(self.code):
+                    monster_data = row  # Assign the matched row to the variable
+                    break  # Terminate the loop when a match is found
+        if monster_data is not None:
+            self.id = monster_data[0]
+            old_name = self.name
+            self.name = monster_data[3]
+            self.type_1 = monster_data[4]
+            if not self.type_1:
+                self.type_1 = None
+            self.type_2 = monster_data[5]
+            if not self.type_2:
+                self.type_2 = None
+            self.ability = monster_data[7]
+            self.alternate_ability = monster_data[8]
+            if not self.alternate_ability:
+                self.alternate_ability = None
+            self.hidden_ability = monster_data[9]
+            if not self.hidden_ability:
+                self.hidden_ability = None
+            self.weight = monster_data[13]
+            self.base_hp = int(monster_data[15])
+            self.base_attack = int(monster_data[16])
+            self.base_defense = int(monster_data[17])
+            self.base_special_attack = int(monster_data[18])
+            self.base_special_defense = int(monster_data[19])
+            self.base_speed = int(monster_data[20])
+            self.evolution_method = monster_data[22]
+            if self.evolution_method:
+                self.can_evolve = True
+            else:
+                self.can_evolve = False
+            self.evolve_id = monster_data[23]
+            old_max_hp = self.max_HP
+            self.calculate_stats()
+            hp_difference = self.max_HP - old_max_hp
+            self.HP += hp_difference
+            self.learn_set = monster_data[24].split(',')
+            # Delete old moves
+            self.move_1 = None
+            self.move_2 = None
+            self.move_3 = None
+            self.move_4 = None
+            self.number_of_moves = 0
+            # Learn new moves
+            for move in self.learn_set:
+                self.add_move(int(move))
+            if self.number_of_moves == 0:
+                self.add_move(1)
+                print("No moves found, learned Tackle")
+            print(f"{old_name} evolved into {self.name}!", end=' ')
+            print(self)
+        else:
+            print("No evolution data found")
+        
 
     def fully_heal(self): # Fully heals the monster
         self.HP = self.max_HP
@@ -595,16 +752,6 @@ def generated_monster(id = 0, level_parameter = 1): #TODO: Implement monster gen
     # Create a randomly generated monster
     # Return the monster
     return monster
-
-
-
-
-
-if __name__ == "__main__":
-    TestMonster = Monster(501, 50)
-    TestMonster2 = Monster(501, 50)
-    print(TestMonster)
-
 
 VICTINI = 494
 SNIVY = 495
@@ -779,6 +926,9 @@ MOUNTAIN_EXCLUSIVES = [VULLABY, RUFFLET]
 FOSSIL_EXCLUSIVES = [TIRTOUGA, ARCHEN]
 RUGGED_EXCLUSIVES = [HEATMOR, DURANT]
 
+LEGENDARY_EXCLUSIVE = [RESHIRAM, ZEKROM]
+
+
 PASTURE_COMMON_1 = [PATRAT, LILLIPUP, PURRLOIN, PIDOVE]
 PASTURE_UNCOMMON_1 = [MINCCINO, PANSAGE, PANSEAR, PANPOUR]
 PASTURE_RARE_1 = [AUDINO, MUNNA]
@@ -824,3 +974,8 @@ WET = [OSHAWOTT,DUCKLETT,FRILLISH,STUNFISK,TYMPOLE,TIRTOUGA,ALOMOMOLA,PANPOUR,BA
 LUSH = [SNIVY,DEERLING,SEWADDLE,PETILIL,COTTONEE,PANSAGE,MARACTUS,FOONGUS,FERROSEED]
 ENERGISED = [BLITZLE,EMOLGA,JOLTIK,KLINK,TYNAMO,DRILBUR,AXEW,MIENFOO,SAWK,THROH]
 
+if __name__ == "__main__":
+    TestMonster = Monster(SNIVY, 50)
+    print(TestMonster)
+    TestMonster.level_up()
+    TestMonster.level_up()
