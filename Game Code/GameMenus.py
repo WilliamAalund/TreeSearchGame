@@ -31,10 +31,20 @@ def title_screen():
             print("Ending game")
             return 1
 
+def generic_continue():
+    if using_calculator_menus():
+        print("Press z to continue")
+        generic_input()
+    else:
+        uinp = ''
+        while uinp != 'z':
+            uinp = input("Press z to continue. { z: continue }: ")
+
 def generic_input(input_message = "Enter input { ", action_1 = "continue", action_2 = "quit", action_3 = "", action_4 = "", action_5 = "", action_6 = "", action_7 = ""):
     if using_calculator_menus():
         return input()
     else: # Case where not on calculator, or force_game_in_terminal is True
+        valid_keys = []
         action_1_available = action_1 != ""
         action_2_available = action_2 != ""
         action_3_available = action_3 != ""
@@ -45,23 +55,30 @@ def generic_input(input_message = "Enter input { ", action_1 = "continue", actio
         print(input_message + " { ", end="")
         if action_1 != "":
             print("z: " + action_1, end="")
+            valid_keys.append("z")
         if action_2 != "":
             print(", x: " + action_2, end="")
+            valid_keys.append("x")
         if action_3 != "":
             print(", c: " + action_3, end="")
+            valid_keys.append("c")
         if action_4 != "":
             print(", v: " + action_4, end="")
+            valid_keys.append("v")
         if action_5 != "":
             print(", b: " + action_5, end="")
+            valid_keys.append("b")
         if action_6 != "":
             print(", n: " + action_6, end="")
+            valid_keys.append("n")
         if action_7 != "":
             print(", m: " + action_7, end="")
+            valid_keys.append("m")
         print(" }: ", end="")
         uinp = ""
-        while uinp not in ["z", "x", "c", "v", "b", "n", "m"]:
+        while uinp not in valid_keys:
             uinp = input()
-            if uinp not in ["z", "x", "c", "v", "b", "n", "m"]:
+            if uinp not in valid_keys:
                 print("Invalid input. Please try again.")
         if uinp == "z" and action_1_available:
             return 0
@@ -115,14 +132,17 @@ def switch_menu(input_message = "Choose a Pokemon.", team_members=[], valid_swit
                     return uinp
         return switch_input
 
-def battle_menu_input(active_member_moves, team_members, valid_switch_indices = []):
+def battle_menu_input(active_member_moves, team_members, valid_switch_indices = [], wild_encounter = False):
     if using_calculator_menus():
         return input()
     else: # Case where not on calculator, or force_game_in_terminal is True
         uinp = -1
         in_menu = True
         while in_menu:
-            minp = generic_input("What will you do?", "Attack", "Pokemon", "Run")
+            if wild_encounter:
+                minp = generic_input("What will you do?", "Attack", "Pokemon", "Bag", "Run")
+            else:
+                minp = generic_input("What will you do?", "Attack", "Pokemon", "Run")
             if minp == 0: # Attack
                 attack_input = -1
                 input_message = "Choose a move." # FIXME: Implement a way to show PP
@@ -151,7 +171,14 @@ def battle_menu_input(active_member_moves, team_members, valid_switch_indices = 
                     else:
                         uinp = -1
                 # List team, then list options about team
-            elif minp == 2: # Run
+            elif minp == 2: # Run or bag
+                if wild_encounter: # Bag
+                    uinp = 11
+                    in_menu = False
+                else: # Run
+                    uinp = 10
+                    in_menu = False
+            elif minp == 3: # Run with wild menu
                 uinp = 10
                 in_menu = False
         print()
@@ -164,19 +191,33 @@ def battle_scene(player_team, ai_team):
     print(" " + player_team.get_member(player_team.active_member_index).get_status_string() if player_team.get_member(player_team.active_member_index).get_status_string() else "", end="")
     player_percent_health = round((player_team.get_member(player_team.active_member_index).get_stat(HP) / player_team.get_active_member().get_stat(MAX_HP)) * 100, 1)
     if player_percent_health > 50:
-        print(" " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")
+        print(" HP: " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")
+        print(" (" + str(player_percent_health) + " %)", end="")
     elif player_percent_health > 25:
         # Color text yellow
-        print("\33[33m " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="\033[0m")
+        print("\33[33m HP: " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")
+        print(" (" + str(player_percent_health) + " %)", end="\033[0m")
     else:
         # Color text red
-        print("\33[31m " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="\033[0m")    
-    print(" | Opponent: ", end="")
+        print("\33[31m HP: " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")    
+        print(" (" + str(player_percent_health) + " %)", end="\033[0m")
+    number_of_pokemon = player_team.get_number_of_members_to_switch_to() + 1
+    number_of_enemy_pokemon = ai_team.get_number_of_members_to_switch_to() + 1
+    if number_of_pokemon > number_of_enemy_pokemon:
+        # Text color green
+        print("\33[32m |" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "| ", end="\033[0m")
+    elif number_of_pokemon < number_of_enemy_pokemon:
+        # Text color red
+        print("\33[31m |" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "| ", end="\033[0m")
+    else:
+        # Text color white (default)
+        print(" |" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "| ", end="")
+    print("Opponent: ", end="")
     print("Lv." + str(ai_team.get_member(ai_team.active_member_index).level) + " ", end="")
     print(ai_team.get_member(ai_team.active_member_index).name, end="")
     print(" " + ai_team.get_member(ai_team.active_member_index).get_status_string() if ai_team.get_member(ai_team.active_member_index).get_status_string() else "", end="")
     ai_hp_percentage = round((ai_team.get_member(ai_team.active_member_index).get_stat(HP) / ai_team.get_active_member().get_stat(MAX_HP)) * 100, 1)
-    print(" " + str(ai_hp_percentage),"%")
+    print(" HP: " + str(ai_hp_percentage),"%")
 
 def starter_menu(name1, name2, name3):
     if using_calculator_menus():

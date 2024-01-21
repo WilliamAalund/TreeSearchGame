@@ -45,62 +45,35 @@ TYPE_CHART = {'Normal':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1
               'Fairy':{'Normal':1, 'Fire':0.5, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':2, 'Poison':0.5, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':2, 'Dark':2, 'Steel':0.5, 'Fairy':1, 'Typeless':1},
               'Typeless':{'Normal':1, 'Fire':1, 'Water':1, 'Electric':1, 'Grass':1, 'Ice':1, 'Fighting':1, 'Poison':1, 'Ground':1, 'Flying':1, 'Psychic':1, 'Bug':1, 'Rock':1, 'Ghost':1, 'Dragon':1, 'Dark':1, 'Steel':1, 'Fairy':1, 'Typeless':1}}
 
-
 def quick_damage_calc(attacker_attack, attacker_attack_multiplier, attacker_level, defender_defense, defender_defense_multiplier, base_power, type_multiplier): 
     raw_calc = ((((2*attacker_level / 5 + 2) * base_power * (attacker_attack / defender_defense)) / 50) + 2)
     multiplier_calc = (raw_calc * type_multiplier * attacker_attack_multiplier) / defender_defense_multiplier
     return math.ceil(multiplier_calc)
 
 def damage_calc(user: Monster, target: Monster, move: Move, user_team, target_team, can_crit = True, visualization = True, is_struggle = False, crit_chance = DEFAULT_CRIT_CHANCE):
-    if can_crit:
-        roll = rng.randint(1,100)
-        if roll < crit_chance:
-            crit_mult = CRIT_MULTIPLIER
-            if visualization:
-                print("Critical hit!", end=" ")
-        else:
-            crit_mult = 1
-    else:
-        crit_mult = 1
+    crit_mult = CRIT_MULTIPLIER if can_crit and rng.randint(1,100) < crit_chance else 1
+    if visualization and crit_mult == CRIT_MULTIPLIER:
+        print("Critical hit!", end=" ")
+
     if is_struggle:
-        stab_mult = 1
-        type_mult = 1
-        power = 50
-        used_attack = user.attack
-        used_defense = target.defense
-        raw_calc = ((((2*user.level / 5 + 2) * move.base_power * (used_attack / used_defense)) / 50) + 2)
-        multiplier_calc = raw_calc * crit_mult * stab_mult * type_mult
-        return math.ceil(multiplier_calc)
-    if move.type == user.type_1 or move.type == user.type_2:
-        stab_mult = STAB_MULTIPLIER
-    else:
-        stab_mult = 1 # Same type attack bonus
-    type_mult = 1
+        return math.ceil(((((2*user.level / 5 + 2) * move.base_power * (user.attack / target.defense)) / 50) + 2))
+
+    stab_mult = STAB_MULTIPLIER if move.type in {user.type_1, user.type_2} else 1
     type_mult = get_type_multiplier(move.type, target.type_1, target.type_2)
-    if move.category == 'Physical':
-        used_attack = user.attack
-        used_attack_multiplier = user.get_multiplier_for_stat(ATTACK)
-        used_defense = target.defense
-        if crit_mult == CRIT_MULTIPLIER and target.get_multiplier_for_stat(DEFENSE) > 0: # Critical hits negate defense boosts/drops
-            used_defense_multiplier = 1
-        else:
-            used_defense_multiplier = target.get_multiplier_for_stat(DEFENSE)
-    elif move.category == 'Special':
-        used_attack = user.special_attack
-        used_attack_multiplier = user.get_multiplier_for_stat(SP_ATTACK)
-        used_defense = target.special_defense
-        if crit_mult == CRIT_MULTIPLIER and target.get_multiplier_for_stat(SP_DEFENSE) > 0: # Critical hits negate defense boosts/drops
-            used_defense_multiplier = 1
-        else:
-            used_defense_multiplier = target.get_multiplier_for_stat(SP_DEFENSE)
+
+    if move.category in {'Physical', 'Special'}:
+        is_physical = move.category == 'Physical'
+        used_attack = user.get_stat_after_status_condition(ATTACK if is_physical else SP_ATTACK)
+        used_attack_multiplier = user.get_multiplier_for_stat(ATTACK if is_physical else SP_ATTACK)
+        used_defense = target.defense if is_physical else target.special_defense
+        used_defense_multiplier = 1 if crit_mult == CRIT_MULTIPLIER and target.get_multiplier_for_stat(DEFENSE if is_physical else SP_DEFENSE) > 0 else target.get_multiplier_for_stat(DEFENSE if is_physical else SP_DEFENSE)
     else:
         if visualization:
             print("damage_calc error: calling damage_calc() on an effect move. Returning 0")
-        return 0    
+        return 0
+
     raw_calc = ((((2*user.level / 5 + 2) * move.base_power * (used_attack / used_defense)) / 50) + 2)
     multiplier_calc = (raw_calc * crit_mult * stab_mult * type_mult * used_attack_multiplier) / used_defense_multiplier
-    if visualization:
-        pass
     return math.ceil(multiplier_calc)
 
 def get_type_multiplier(move_type, target_type_1, target_type_2 = None):
@@ -178,7 +151,6 @@ def does_first_team_win_matchup(user_team: Team, target_team: Team):
     else:
         return False
 
-
 class GameState():
     def __init__(self, player_team, ai_team, turn_count = 0, last_move = 0) -> None:
         self.player_team = player_team
@@ -221,7 +193,7 @@ class GameState():
         if not self.last_turn_summary:
             return False
         else:
-            for action in self.last_turn_summary: # FIXME: This is not working for some reason. Possible bug with TurnActionSummary object
+            for action in self.last_turn_summary:
                 if action.was_ai_action and action.target_fainted: 
                     return True 
                 elif not action.was_ai_action and action.target_fainted :
@@ -343,7 +315,6 @@ class GameState():
         if self.ai_team.get_member(self.ai_team.active_member_index).fainted:
             self.ai_needs_to_switch = True
 
-
 def switch_after_fainting(switching_team: Team, switch_index, visualization = True): # Switches the active monster of a team
     if visualization:
         print(switching_team.name, "sent out", switching_team.get_member(switch_index).name + "!")
@@ -357,7 +328,7 @@ def turn(player_team: Team, player_choice, ai_team: Team, ai_choice, visualizati
     player_active_member = player_team.get_active_member()
     ai_active_member = ai_team.get_active_member()
 
-    if player_choice > MOVE_4 and not player_choice == 10: # Switch if necessary
+    if player_choice > MOVE_4 and not player_choice == 10 and not player_choice == 11: # Switch if necessary
         player_turn_action = TurnAction(player_active_member, player_team, player_choice, ai_active_member, ai_team, False, visualization, can_crit = rng)
         player_turn_action.excecute_action()
         player_active_member = player_team.get_active_member() # FIXME: This is a hacky way to update the active member
@@ -383,19 +354,20 @@ def turn(player_team: Team, player_choice, ai_team: Team, ai_choice, visualizati
             action_summaries.append(turn.excecute_action())
         if visualization:
             if player_active_member.fainted:
-                print(player_active_member.name + " fainted")
+                print("\033[91m" + player_active_member.name + " fainted!" + "\033[0m")  # Red color for player fainting
             elif ai_active_member.fainted:
-                print(ai_active_member.name + " fainted")
+                print("\033[92m" + ai_active_member.name + " fainted!" + "\033[0m")  # Green color for AI fainting
             print()
     # Apply field effects, status effects, etc.
     return action_summaries
         
     
 ###################################### TURN ACTION CLASS ######################################
+MOVE_EFFECTS = ["None", "Multi_Hit", "High_Crit", "Recoil", "Moderate_Recoil", "Heal_Damage", "Alter_Attack", "Alter_Defense", "Alter_Sp_Attack", "Alter_Sp_Defense", "Alter_Speed", "Alter_Accuracy", "Alter_Evasion", "Recharge", "Halve_HP", "40_Damage", "Set_Sun", "Set_Rain", "Set_Sandstorm", "Heal_Damage", "Sleep", "Freeze_Flinch", "Burn_Flinch", "Synthesis_Heal", "Charge"]
 class TurnAction: # Used in turn function to organize actions that need to be taken
     def __init__(self, user: Monster, user_team: Team, uinp, target: Monster, target_team: Team, was_ai_action, visualization = True, can_crit = True) -> None:
         self.was_ai_action = was_ai_action
-        self.user = user
+        self.user: Monster = user
         self.user_team = user_team
         self.uinp = uinp
         self.target = target
@@ -421,6 +393,28 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         if self.uinp <= MOVE_4:
             self.turn_action_summary.record_move_as_attacking_move()
             if not self.user.fainted: # Check if user is fainted  
+                # FIXME: Status conditions will need to reset taunt timers
+                if self.user.status_condition == SLEEP or self.user.status_condition == FROZEN:
+                    status = self.user.status_condition
+                    user_woke_up_or_thawed_out = self.user.get_sleep_or_freeze_result()
+                    if user_woke_up_or_thawed_out:
+                        if self.visualization:
+                            if status == SLEEP:
+                                print(self.user_team.name + "'s " + self.user.name + " woke up!")
+                            elif status == FROZEN:
+                                print(self.user_team.name + "'s " + self.user.name + " thawed out!")
+                        self.turn_action_summary.record_as_woke_up_or_thawed_out()
+                    else:
+                        if self.visualization:
+                            if status == SLEEP:
+                                print(self.user_team.name + "'s " + self.user.name + " is fast asleep.")
+                            elif status == FROZEN:
+                                print(self.user_team.name + "'s " + self.user.name + " is frozen solid!")
+                        self.turn_action_summary.record_as_asleep_or_frozen()
+                        if self.user.must_recharge:
+                            self.user.set_recharge()
+                            self.turn_action_summary.record_user_recharging()
+                        return self.turn_action_summary
                 if self.user.status_condition == PARALYSIS and self.can_crit:
                     if rng.randint(1,4) == 1:
                         if self.visualization:
@@ -430,6 +424,23 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                             self.user.set_recharge()
                             self.turn_action_summary.record_user_recharging()
                         return self.turn_action_summary 
+                if self.user.is_confused:
+                    user_hits_itself = self.user.get_confusion_result()
+                    if user_hits_itself == SNAP_OUT_OF_CONFUSION:
+                        if self.visualization:
+                            print(self.user_team.name + "'s " + self.user.name + " snapped out of confusion!")
+                        self.turn_action_summary.record_as_snapped_out_of_confusion()
+                        self.user.is_confused = False
+                    elif user_hits_itself == CONFUSED_NO_DAMAGE:
+                        if self.visualization:
+                            print(self.user_team.name + "'s " + self.user.name + " is confused!")
+                    elif user_hits_itself == CONFUSED_DAMAGE:
+                        if self.visualization:
+                            print(self.user_team.name + "'s " + self.user.name + " is confused!")
+                            print(self.user_team.name + "'s " + self.user.name + " hurt itself in confusion!")
+                        self.do_confusion_damage()
+                        self.turn_action_summary.record_as_confused()
+                        return self.turn_action_summary
                 if self.user.must_recharge:
                     self.user.set_recharge()
                     if self.visualization:
@@ -455,7 +466,8 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                     self.turn_action_summary.record_as_missed()
                     self.turn_action_summary.set_damage_dealt(0)
                     return self.turn_action_summary
-                
+                effect_chance_check = self.accuracy_check(self.move_used.effect_chance)
+
                 if self.move_used.category == 'Physical' or self.move_used.category == 'Special':
                     if self.move_used.effect == "Halve_HP":
                         damage = max(1,math.floor(self.target.HP / 2))
@@ -505,9 +517,7 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                             self.user.set_recharge()
                     self.expend_pp()
                 else:
-                    if self.move_used.effect == "Paralyze":
-                        self.paralyze()
-                    elif self.move_used.effect == "Synthesis_Heal":
+                    if self.move_used.effect == "Synthesis_Heal":
                         self.synthesis_heal()
                     elif self.move_used.effect == "Heal_User":
                         heal_percentage = self.move_used.effect_magnitude
@@ -517,6 +527,78 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
                         # Special exception for Gear Shift which raises attack by one stage and speed by two stages
                     elif self.move_used.effect == "Shift_Gear":
                         self.shift_gear()
+                    elif self.move_used.effect == "Taunt":
+                        self.inflict_taunt() # TODO
+                    elif self.move_used.effect == "Charge":
+                        pass # TODO
+                        if self.visualization:
+                            print("Status move's effect is not implemented")
+                    elif self.move_used.effect == "Reset_Stat_Changes":
+                        pass # TODO
+                        if self.visualization:
+                            print("Status move's effect is not implemented")
+                    elif self.move_used.effect == "Freeze_Flinch":
+                        pass # TODO
+                        if self.visualization:
+                            print("Status move's effect is not implemented")
+                    elif self.move_used.effect == "Confuse":
+                        if not self.target.is_confused:
+                            self.inflict_confusion()
+                        else:
+                            if self.visualization:
+                                print(self.target.name + " is already confused!")
+                            self.turn_action_summary.record_move_failed()
+                    elif self.move_used.effect == "Paralyze":
+                        if not self.target.status_condition:
+                            self.inflict_status_condition(PARALYSIS)
+                        else:
+                            if self.visualization:
+                                print("But it failed!")
+                            self.turn_action_summary.record_move_failed()
+                    elif self.move_used.effect == "Sleep":
+                        if not self.target.status_condition: # Status condition cannot overwrite another status condition
+                            self.inflict_status_condition(SLEEP)
+                        else:
+                            if self.visualization:
+                                print("But it failed!")
+                            self.turn_action_summary.record_move_failed()
+                    elif self.move_used.effect == "Burn": # TODO: Implement burn damage
+                        if not self.target.status_condition:
+                            self.inflict_status_condition(BURN)
+                        else:
+                            if self.visualization:
+                                print("But it failed!")
+                            self.turn_action_summary.record_move_failed()
+                    elif self.move_used.effect == "Poison": # TODO: Implement poison damage
+                        if not self.target.status_condition:
+                            self.inflict_status_condition(POISON)
+                        else:
+                            if self.visualization:
+                                print("But it failed!")
+                            self.turn_action_summary.record_move_failed()
+                    elif self.move_used.effect == "Freeze":
+                        if not self.target.status_condition:
+                            self.inflict_status_condition(FREEZE)
+                        else:
+                            if self.visualization:
+                                print("But it failed!")
+                            self.turn_action_summary.record_move_failed()
+                    elif self.move_used.effect == "Set_Hail":
+                        pass
+                        if self.visualization:
+                            print("Status move's effect is not implemented")
+                    elif self.move_used.effect == "Set_Sandstorm":
+                        pass
+                        if self.visualization:
+                            print("Status move's effect is not implemented")
+                    elif self.move_used.effect == "Set_Sun":
+                        pass
+                        if self.visualization:
+                            print("Status move's effect is not implemented")
+                    elif self.move_used.effect == "Set_Rain":
+                        pass
+                        if self.visualization:
+                            print("Status move's effect is not implemented")
                     else:
                         if self.visualization:
                             print("Status move's effect is not implemented")
@@ -537,13 +619,54 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         else:
             try:
                 if self.visualization:
-                    print(self.user_team.name + " switched out " + self.user.name + " for " + self.user_team.get_member(self.uinp - 4).name)
+                    print(self.user_team.name + " switched out " + self.user.name + " for " + self.user_team.get_member(self.uinp - 4).name + "!")
                 self.user_team.switch_active_member(self.uinp - 4)
                 self.turn_action_summary.record_move_as_switch()
             except:
                 print("Switching error")
         return self.turn_action_summary
     
+    def inflict_status_condition(self, status_condition, attack_condition = False):
+        if self.target.status_condition == None and not self.target.fainted:
+            if status_condition == PARALYSIS:
+                self.target.set_paralysis()
+            elif status_condition == BURN:
+                self.target.set_burn()
+            elif status_condition == POISON:
+                self.target.set_poison()
+            elif status_condition == SLEEP:
+                self.target.set_sleep()
+            elif status_condition == FREEZE:
+                self.target.set_freeze()
+            if self.visualization:
+                if status_condition == PARALYSIS:
+                    print(self.target.name + " was paralyzed!")
+                elif status_condition == BURN:
+                    print(self.target.name + " was burned!")
+                elif status_condition == POISON:
+                    print(self.target.name + " was poisoned!")
+                elif status_condition == SLEEP:
+                    print(self.target.name + " fell asleep!")
+                elif status_condition == FREEZE:
+                    print(self.target.name + " was frozen solid!")
+                else:
+                    print("Status condition error")
+        else:
+            if attack_condition: # An attacking move doesn't "fail" if it doesn't inflict a status condition
+                pass
+            else:
+                if self.visualization:
+                    print("But it failed!")
+                self.turn_action_summary.record_move_failed()
+
+    def inflict_taunt(self):
+        pass
+    
+    def inflict_confusion(self):
+        self.target.set_confused()
+        if self.visualization:
+            print(self.target.name + " became confused!")
+
     def paralyze(self, attack_condition = False): # attack_condition determines if this method is being called by an attacking or an effect move
         if self.target.status_condition == None and not self.target.fainted:
             self.target.status_condition = PARALYSIS
@@ -725,6 +848,17 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
             self.set_target_fainted()
         return damage
 
+    def do_confusion_damage(self):
+        # User hits themself with a move equivalent to tackle in power. Does not crit
+        damage = damage_calc(self.user, self.user, Move(161), self.user_team, self.user_team, visualization=False, is_struggle=False, can_crit=False)
+        self.user.HP -= damage
+        if self.visualization:
+            print(self.user.name + " took " + str(damage) + " damage!")
+            target_hp_max = self.user.get_stat(MAX_HP)
+            print(f"- {(damage / target_hp_max) * 100:.1f} %")
+        if self.user.HP <= 0:
+            self.set_user_fainted()
+        return damage
     # FIXME: Healing should be added to the TurnActionSummary object
     def synthesis_heal(self): # FIXME: Implement weather
         heal_amount = math.floor(self.user.max_HP * 0.5)
@@ -754,7 +888,8 @@ class TurnAction: # Used in turn function to organize actions that need to be ta
         if overheal_amount < 0:
             overheal_amount = 0
         if self.visualization:
-            print(self.user.name + " healed " + str(heal_amount - overheal_amount) + " HP!")
+            if heal_amount > 0:
+                print(self.user.name + " healed " + str(heal_amount - overheal_amount) + " HP!")
         self.user.HP += heal_amount
         if overheal_amount > 0:
             self.user.HP = self.user.max_HP
@@ -794,6 +929,12 @@ class TurnActionSummary:
         self.user_fainted = False
         self.user_had_to_recharge = False
         self.user_was_fully_paralyzed = False
+        self.user_was_asleep_or_frozen = False
+        self.move_effect_proced = False
+        self.move_crit = False
+        self.user_hits_itself = False
+        self.user_snapped_out_of_confusion = False
+        self.user_woke_up_or_thawed_out = False
 
     def __str__(self) -> str:
         return f"Input number: {self.input_number}\nWas AI action: {self.was_ai_action}\nDamage dealt: {self.damage_dealt}\nUser missed: {self.user_missed}\nMove failed: {self.move_failed}\nMove was not very effective: {self.move_was_not_very_effective}\nWas effect move: {self.was_effect_move}\nWas attacking move: {self.was_attacking_move}\nWas switch: {self.was_switch}\nWas struggle: {self.was_struggle}\nWas switch after faint: {self.was_switch_after_faint}\nTarget fainted: {self.target_fainted}\nUser fainted: {self.user_fainted}\n"
@@ -802,6 +943,23 @@ class TurnActionSummary:
         if self.was_attacking_move and self.damage_dealt == 0:
             return True
         return False
+
+    def record_as_confused(self):
+        self.user_hits_itself = True
+        self.move_failed = True
+
+    def record_as_asleep_or_frozen(self):
+        self.user_was_asleep_or_frozen = True
+        self.move_failed = True
+
+    def record_as_snapped_out_of_confusion(self):
+        self.user_snapped_out_of_confusion = True
+
+    def record_as_woke_up_or_thawed_out(self):
+        self.user_woke_up_or_thawed_out = True
+
+    def record_move_effect_as_successful(self):
+        self.move_effect_proced = True
 
     def record_as_paralyzed(self):
         self.user_was_fully_paralyzed = True
@@ -851,6 +1009,69 @@ class TurnActionSummary:
 
     def set_damage_dealt(self, damage_dealt):
         self.damage_dealt = damage_dealt
+
+class FieldEffects:
+    def __init__(self, player_team, ai_team, visualization = False) -> None:
+        self.SUN = 0
+        self.RAIN = 1
+        self.SANDSTORM = 2
+        self.HAIL = 3
+        self.current_weather = None
+        self.current_weather_timer = 0
+        self.player_team = player_team
+        self.ai_team = ai_team
+        self.visualization = visualization
+        pass
+
+    def excecute_effects(self):
+        pass
+
+    def set_weather(self, weather):
+        if weather == self.SUN:
+            self.current_weather = self.SUN
+        elif weather == self.RAIN:
+            self.current_weather = self.RAIN
+        elif weather == self.SANDSTORM:
+            self.current_weather = self.SANDSTORM
+        elif weather == self.HAIL:
+            self.current_weather = self.HAIL
+
+    def get_weather_multiplier(self, move_type):
+        pass
+
+    def increment_weather_timer(self):
+        if self.current_weather_timer > 0:
+            self.current_weather_timer -= 1
+            if self.current_weather_timer == 0:
+                if self.visualization:
+                    if self.current_weather == self.SUN:
+                        print("The sunlight faded.")
+                    elif self.current_weather == self.RAIN:
+                        print("The rain stopped.")
+                    elif self.current_weather == self.SANDSTORM:
+                        print("The sandstorm subsided.")
+                    elif self.current_weather == self.HAIL:
+                        print("The hail stopped.")
+                self.current_weather = None
+            else:
+                if self.visualization:
+                    if self.current_weather == self.SUN:
+                        print("The sunlight is strong.")
+                    elif self.current_weather == self.RAIN:
+                        print("Rain continues to fall.")
+                    elif self.current_weather == self.SANDSTORM:
+                        print("The sandstorm rages.")
+                    elif self.current_weather == self.HAIL:
+                        print("Hail continues to fall.")
+        else:
+            pass
+    
+    def activate_status_damage(self):
+        pass
+
+class FieldEffectsSummary:
+    def __init__(self) -> None:
+        pass
 
 if __name__ == "__main__":
     TestTeam = Team("TestTeam")

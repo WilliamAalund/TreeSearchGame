@@ -33,6 +33,10 @@ BURN = 3
 FREEZE = 4
 SLEEP = 5
 
+SNAP_OUT_OF_CONFUSION = 0
+CONFUSED_NO_DAMAGE = 1
+CONFUSED_DAMAGE = 2
+
 NATURE_DICT = {'Hardy': (ATTACK, ATTACK), 'Lonely': (ATTACK, DEFENSE), 'Adamant': (ATTACK, SP_ATTACK), 'Naughty': (ATTACK, SP_DEFENSE), 'Brave': (ATTACK, SPEED),
               'Bold': (DEFENSE, ATTACK), 'Docile': (DEFENSE, DEFENSE), 'Impish': (DEFENSE, SP_ATTACK), 'Lax': (ATTACK, SP_DEFENSE), 'Relaxed': (DEFENSE, SPEED),
               'Modest': (SP_ATTACK, ATTACK), 'Mild': (SP_ATTACK, DEFENSE), 'Bashful': (SP_ATTACK, SP_ATTACK), 'Rash': (SP_ATTACK, SP_DEFENSE), 'Quiet': (SP_ATTACK, SPEED),
@@ -57,16 +61,6 @@ UNIQUE_EVOLUTION_METHODS = [EVOLVE_VIA_TRADE, EVOLVE_VIA_LEAF_STONE, EVOLVE_VIA_
 
 class Monster: #TODO: set up move database for each monster
     def __init__(self, number_id=1, level=1, code=1, deep_copy=None, perfect_IVs = False) -> None:
-        
-        self.attack_boost = 0
-        self.defense_boost = 0
-        self.special_attack_boost = 0
-        self.special_defense_boost = 0
-        self.speed_boost = 0
-        self.accuracy_boost = 0
-        self.evasion_boost = 0
-        self.crit_chance = 0
-        self.must_recharge = False
 
         if deep_copy:
             self.id = deep_copy.id
@@ -129,9 +123,39 @@ class Monster: #TODO: set up move database for each monster
             self.evolve_id = deep_copy.evolve_id
             self.learn_set = deep_copy.learn_set
 
+            self.attack_boost = deep_copy.attack_boost
+            self.defense_boost = deep_copy.defense_boost
+            self.special_attack_boost = deep_copy.special_attack_boost
+            self.special_defense_boost = deep_copy.special_defense_boost
+            self.speed_boost = deep_copy.speed_boost
+            self.accuracy_boost = deep_copy.accuracy_boost
+            self.evasion_boost = deep_copy.evasion_boost
+            self.crit_chance = deep_copy.crit_chance
+            self.must_recharge = deep_copy.must_recharge
+            self.status_turns = deep_copy.status_turns
+            self.is_taunted = deep_copy.is_taunted
+            self.taunted_turns = deep_copy.taunted_turns
+            self.is_confused = deep_copy.is_confused
+            self.confused_turns = deep_copy.confused_turns
 
             return
-        else:
+        else: # Case where not deep copying
+
+            self.attack_boost = 0
+            self.defense_boost = 0
+            self.special_attack_boost = 0
+            self.special_defense_boost = 0
+            self.speed_boost = 0
+            self.accuracy_boost = 0
+            self.evasion_boost = 0
+            self.crit_chance = 0
+            self.must_recharge = False
+            self.status_turns = 0
+            self.is_taunted = False
+            self.taunted_turns = 0
+            self.is_confused = False
+            self.confused_turns = 0
+
             # Monster stats
             self.id = None
             self.code = code
@@ -261,6 +285,9 @@ class Monster: #TODO: set up move database for each monster
             stats += "\n --- "
         return f"\n{self.name} | Lv.{self.level} | HP: {self.HP}/{self.max_HP} | {self.type_1} {self.type_2 + ' ' if self.type_2 else ''}| {self.nature} | {('Evolution: ' + self.get_evolution_method()) if self.get_evolution_method() else ''}\n{stats}\n"
     
+    def get_base_stat_total(self):
+        return self.base_hp + self.base_attack + self.base_defense + self.base_special_attack + self.base_special_defense + self.base_speed
+
     def get_list_of_moves(self):
         moves = []
         if self.move_1:
@@ -321,6 +348,100 @@ class Monster: #TODO: set up move database for each monster
         self.crit_chance = 0
         self.must_recharge = False
 
+    def reset_semi_permanent_status_conditions(self):
+        self.is_confused = False
+        self.confused_turns = 0
+        self.is_taunted = False
+        self.taunted_turns = 0
+
+    def check_if_wakes_up_or_thaws(self):
+        if self.status_condition == SLEEP:
+            self.status_turns -= 1
+            if self.status_turns == 0:
+                self.status_condition = None
+                return True
+            else:
+                return False
+        elif self.status_condition == FREEZE:
+            self.status_turns -= 1
+            if self.status_turns == 0:
+                self.status_condition = None
+                return True
+            else:
+                return False
+
+    # Status condition methods: Called by other methods to set status conditions. Effects are applied in other methods.
+    def set_sleep(self):
+        self.status_condition = SLEEP
+        self.status_turns = rng.randint(1, 7)
+    
+    def set_freeze(self):
+        self.status_condition = FREEZE
+        self.status_turns = rng.randint(1, 7)
+
+    def set_poison(self):
+        self.status_condition = POISON
+    
+    def set_toxic_poison(self):
+        self.status_condition = TOXIC_POISON
+
+    def set_paralysis(self):
+        self.status_condition = PARALYSIS
+    
+    def set_burn(self):
+        self.status_condition = BURN
+
+    def set_taunted(self):
+        self.is_taunted = True
+        self.taunted_turns = rng.randint(3,5)
+
+    def set_confused(self):
+        self.is_confused = True
+        self.confused_turns = rng.randint(2,4)
+
+    def set_recharge(self):
+        self.must_recharge = not self.must_recharge
+
+    def get_confusion_result(self):
+        SNAP_OUT_OF_CONFUSION = 0
+        CONFUSED_NO_DAMAGE = 1
+        CONFUSED_DAMAGE = 2
+        self.confused_turns -= 1
+        if self.confused_turns == 0:
+            self.is_confused = False
+            return SNAP_OUT_OF_CONFUSION
+        else:
+            return rng.choice([CONFUSED_DAMAGE, CONFUSED_NO_DAMAGE])
+
+    def get_sleep_or_freeze_result(self):
+        WAKE_UP = True
+        SLEEP_OR_FREEZE = False
+        self.status_turns -= 1
+        if self.status_turns <= 0:
+            self.status_condition = None
+            return WAKE_UP
+        else:
+            return SLEEP_OR_FREEZE
+
+    def set_boost_for_stat(self, stat, boost): # Sets the boost value for a particular stat
+        if stat == ATTACK:
+            self.attack_boost = boost
+        elif stat == DEFENSE:
+            self.defense_boost = boost
+        elif stat == SP_ATTACK:
+            self.special_attack_boost = boost
+        elif stat == SP_DEFENSE:
+            self.special_defense_boost = boost
+        elif stat == SPEED:
+            self.speed_boost = boost
+        elif stat == ACCURACY:
+            self.accuracy_boost = boost
+        elif stat == EVASION:
+            self.evasion_boost = boost
+        else:
+            print("Invalid stat code")
+            return 0
+
     def get_boost_for_stat(self, stat):
         if stat == ATTACK:
             return self.attack_boost
@@ -378,11 +499,28 @@ class Monster: #TODO: set up move database for each monster
         else:
             return 1
 
+    def get_stat_after_status_condition(self, stat): # Returns the stat value after status conditions are applied
+        if stat == ATTACK:
+            if self.status_condition == BURN:
+                return int(self.attack * 0.5)
+            return self.attack
+        elif stat == DEFENSE:
+            return self.defense
+        elif stat == SP_ATTACK:
+            return self.special_attack
+        elif stat == SP_DEFENSE:
+            return self.special_defense
+        elif stat == SPEED:
+            if self.status_condition == PARALYSIS:
+                return int(self.speed * 0.25)
+            return self.speed
+        
     def get_experienced_stat(self, stat): # Returns the stat value after boosts are applied
+        # FIXME: May deprecate this method. damage_calc() already applies boosts. 
         if stat == ATTACK:
             if self.status_condition == BURN:
                 return int(self.attack * self.get_multiplier_for_stat(ATTACK) * 0.5)
-            return int(self.attack * self.get_multiplier_for_stat(ATTACK))
+            return int(self.attack * self.get_multiplier_for_stat(ATTACK)), 42
         elif stat == DEFENSE:
             return int(self.defense * self.get_multiplier_for_stat(DEFENSE))
         elif stat == SP_ATTACK:
@@ -409,28 +547,6 @@ class Monster: #TODO: set up move database for each monster
             return "\033[36mFRZ\033[0m"  # Cyan
         else:
             return ""
-
-    def set_recharge(self):
-        self.must_recharge = not self.must_recharge
-
-    def set_boost_for_stat(self, stat, boost): # Sets the boost value for a particular stat
-        if stat == ATTACK:
-            self.attack_boost = boost
-        elif stat == DEFENSE:
-            self.defense_boost = boost
-        elif stat == SP_ATTACK:
-            self.special_attack_boost = boost
-        elif stat == SP_DEFENSE:
-            self.special_defense_boost = boost
-        elif stat == SPEED:
-            self.speed_boost = boost
-        elif stat == ACCURACY:
-            self.accuracy_boost = boost
-        elif stat == EVASION:
-            self.evasion_boost = boost
-        else:
-            print("Invalid stat code")
-            return 0
 
     def get_list_of_valid_attack_move_numbers(self): # Returns a list of moves that are not effect moves
         moves = []
@@ -619,15 +735,18 @@ class Monster: #TODO: set up move database for each monster
         # level up if experience is enough
         pass
 
-    def level_up(self): # Levels up the monster by 1
-        if self.level < 100:
+    def level_up(self, increment_level_amount = 1): # Levels up the monster by 1
+        level_increase = increment_level_amount
+        if self.level + level_increase > 100:
+            level_increase = 100 - self.level
+        if self.level + level_increase <= 100:
             old_max_hp = self.max_HP
             old_attack = self.attack
             old_defense = self.defense
             old_special_attack = self.special_attack
             old_special_defense = self.special_defense
             old_speed = self.speed
-            self.level += 1
+            self.level += level_increase
             self.calculate_stats() 
             print(f"{self.name} leveled up to level {self.level}!")
             print(f"HP: {old_max_hp} -> {self.max_HP}")
@@ -716,8 +835,7 @@ class Monster: #TODO: set up move database for each monster
             print(f"{old_name} evolved into {self.name}!", end=' ')
             print(self)
         else:
-            print("No evolution data found")
-        
+            print("No evolution data found")       
 
     def fully_heal(self): # Fully heals the monster
         self.HP = self.max_HP

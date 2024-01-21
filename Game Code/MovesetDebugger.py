@@ -144,9 +144,7 @@ def open_and_edit_row_of_entry(id):
                 moves = data_entry[MOVES_COLUMN].split(',')
                 moves.remove(moves[-1])
                 data_entry[MOVES_COLUMN] = ','.join(moves)
-            elif uinp[0] == 'e' and len(uinp) == 2 and uinp[1].isnumeric():
-                
-                
+            elif uinp[0] == 'e' and len(uinp) == 2 and uinp[1].isnumeric(): # FIXME: This doesnt work
                 move_number_to_edit = int(uinp[1])
                 if move_number_to_edit > number_of_moves or move_number_to_edit < 1:
                     print("Invalid number for selecting move to edit")

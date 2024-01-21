@@ -11,6 +11,10 @@ class Team:
         self.wild = wild
 
     def __str__(self) -> str:
+        result = ''
+        for monster in self.team_members:
+            result += str(monster) + '\n'
+        return result
         team_members_names = [str(member.name) for member in self.team_members]
         return f"Team: {self.name} | Team size: {self.team_size} | Team level: {self.team_level} | Team members: {', '.join(team_members_names)}"
 
@@ -44,6 +48,12 @@ class Team:
         print(len(self.team_members))
         return self.team_members
 
+    def get_member_names(self):
+        names = []
+        for monster in self.team_members:
+            names.append(monster.name)
+        return names
+
     def get_active_member(self):
         return self.team_members[self.active_member_index]
 
@@ -68,6 +78,7 @@ class Team:
     def switch_active_member(self, index, reset_boosts = True):
         if index in self.get_list_of_valid_switch_indices():
             self.get_active_member().reset_boosts()
+            self.get_active_member().reset_semi_permanent_status_conditions()
             self.active_member_index = index
         else:
             #print(self.name, "switch_active_member error: invalid switch index:" , index)
@@ -109,6 +120,14 @@ class Team:
     def get_number_of_members_fainted(self):
         return self.team_size - self.team_members_healthy
 
+    def get_leading_member_index(self):
+        curr_index = 0
+        for monster in self.team_members:
+            if not monster.fainted:
+                return curr_index
+            curr_index += 1
+        print("Error: No leading member found")
+        return -1
 
     def is_active_member_fainted(self):
         return self.team_members[self.active_member_index].fainted
@@ -116,6 +135,11 @@ class Team:
     def fully_heal_team(self):
         for monster in self.team_members:
             monster.fully_heal()
+
+    def level_up(self, level):
+        self.team_level += level
+        for monster in self.team_members:
+            monster.level_up(level)
 
     def deep_copy(self):
         new_team = Team()

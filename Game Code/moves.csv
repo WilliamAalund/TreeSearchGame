@@ -159,3 +159,4 @@ NUMBER,NAME,TYPE,CATEGORY,BASE_POWER,ACCURACY,BASE_PP,EFFECT_CHANCE,PRIORITY,EFF
 158,Play Rough,Fairy,Physical,90,90,10,10,0,Alter_Physical_Attack,-1,N,S,Chance to lower the target's attack.,M,,,
 159,Fairy Wind,Fairy,Physical,40,100,30,30,0,None,0,N,S,,-,,,
 160,Struggle,Typeless,Physical,50,101,0,0,0,Recoil,0,N,S,Only usable when all PP are gone. Hurts the user.,-,,,
+161,Confused Hit,Typeless,Physical,40,101,0,0,0,None,0,N,U,Used when the user hits itself in confusion.,,,,
