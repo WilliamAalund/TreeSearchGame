@@ -5,7 +5,7 @@ from PlayerClass import Player
 def exclusive_total():
     return genie_exclusive + forest_exclusive_1 + forest_exclusive_2 + town_exclusive + mountain_exclusive + fossil_exclusive + rugged_exclusive
 
-gym_level = 6
+gym_level = 8
 trainer_level = 4
 wild_level = 3
 genie_exclusive = rng.randint(0,1)
@@ -35,6 +35,7 @@ def generate_trainer_team():
 
 def generate_gym_team():
     team = Team("Gym Leader")
+    team.add_member(Monster(PATRAT,gym_level))
     team.add_member(Monster(PURRLOIN,gym_level))
     return team
 
@@ -60,11 +61,9 @@ def wild_encounter(player: Player, wild_level: int, wild_streak: int):
     if match_result == 2: # Player caught the wild monster
         player.get_team().add_member(wild_team.pop_member(wild_team.active_member_index))
     elif match_result == 1: # Player defeated the wild monster
-        print("Player defeated the wild monster")
         player.level_up(1)
         return 1
     else: # Player lost to the wild monster
-        print("Player lost to the wild monster")
         return 0
 
 def trainer_encounter(player: Player, trainer_level: int):
@@ -187,11 +186,18 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
                 ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=random_ai_policy).get_best_move()
             switch_after_fainting(ai_team, ai_choice - 4)
         print("-----------------------------------------")   
-        gm.battle_scene(player_team, ai_team)
-        if wild_encounter:
-            uinp = gm.battle_menu_input(player_team.get_member(player_team.active_member_index).get_list_of_moves(), player_team.get_list_of_members_to_switch_to(), player_team.get_list_of_valid_switch_indices(), wild_encounter=True)
-        else:
-            uinp = gm.battle_menu_input(player_team.get_member(player_team.active_member_index).get_list_of_moves(), player_team.get_list_of_members_to_switch_to(), player_team.get_list_of_valid_switch_indices())
+        in_menu = True
+        while in_menu:
+            gm.battle_scene(player_team, ai_team)
+            if wild_encounter:
+                uinp = gm.battle_menu_input(player_team.get_member(player_team.active_member_index).get_list_of_moves(), player_team.get_list_of_members_to_switch_to(), player_team.get_list_of_valid_switch_indices(), wild_encounter=True)
+            else:
+                uinp = gm.battle_menu_input(player_team.get_member(player_team.active_member_index).get_list_of_moves(), player_team.get_list_of_members_to_switch_to(), player_team.get_list_of_valid_switch_indices())
+            if uinp == 10 and not wild_encounter: # Player can only run away from wild encounters
+                # Color text red
+                print("\033[31mNo! There's no running away from a trainer battle!\033[0m")
+            else:
+                in_menu = False
         print("-----------------------------------------")    
         if uinp == 11 and wild_encounter == True: # throw pokeball 
             print("Player used a pokeball on the wild " + ai_team.get_active_member().name + "!")
@@ -213,7 +219,7 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
             else:
                 print("The wild " + ai_team.get_active_member().name + " broke free!")
                 catch_attempts += 1
-        if uinp == 10: # FIXME: Implement player losing by running away
+        if uinp == 10: # FIXME: Implement player not losing by running away
             print("Player ran away!")
             return 0
         if random_ai == True:

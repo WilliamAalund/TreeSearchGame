@@ -43,17 +43,17 @@ class Player:
                 print("No team members")
                 in_menu = False
             elif len(names) == 1:
-                choice = gm.generic_input("Choose a monster to view", names[0])
+                choice = gm.generic_input("Choose a monster to view", names[0], "Back")
             elif len(names) == 2:
-                choice = gm.generic_menu("Choose a monster to view", names[0], names[1])
+                choice = gm.generic_input("Choose a monster to view", names[0], names[1], "Back")
             elif len(names) == 3:
-                choice = gm.generic_menu("Choose a monster to view", names[0], names[1], names[2])
+                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], "Back")
             elif len(names) == 4:
-                choice = gm.generic_menu("Choose a monster to view", names[0], names[1], names[2], names[3])
+                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], names[3], "Back")
             elif len(names) == 5:
-                choice = gm.generic_menu("Choose a monster to view", names[0], names[1], names[2], names[3], names[4])
+                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], names[3], names[4], "Back")
             elif len(names) == 6:
-                choice = gm.generic_menu("Choose a monster to view", names[0], names[1], names[2], names[3], names[4], names[5])
+                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], names[3], names[4], names[5], "Back")
             if choice in range(len(names)):
                 print(self.team.get_member(choice))
             else:
