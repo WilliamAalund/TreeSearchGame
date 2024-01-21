@@ -15,7 +15,10 @@ class Player:
         starter_1 = Monster(STARTER_1, self.team.team_level)
         starter_2 = Monster(STARTER_2, self.team.team_level)
         starter_3 = Monster(STARTER_3, self.team.team_level)
-        starter_choice = gm.starter_menu(starter_1.name, starter_2.name, starter_3.name)
+        starter_1_name = "\33[32m" + starter_1.name + "\33[0m"
+        starter_2_name = "\33[31m" + starter_2.name + "\33[0m"
+        starter_3_name = "\33[34m" + starter_3.name + "\33[0m"
+        starter_choice = gm.starter_menu(starter_1_name, starter_2_name, starter_3_name)
         if starter_choice == 0:
             self.team.add_member(starter_1)
         elif starter_choice == 1:
@@ -37,23 +40,23 @@ class Player:
 
     def view_team(self):
         in_menu = True
-        names = self.team.get_member_names()
+        names = self.team.get_member_names_and_hp()
         while in_menu:
             if len(names) == 0:
                 print("No team members")
                 in_menu = False
             elif len(names) == 1:
-                choice = gm.generic_input("Choose a monster to view", names[0], "Back")
+                choice = gm.generic_input("Choose a monster to view:", names[0], "Back")
             elif len(names) == 2:
-                choice = gm.generic_input("Choose a monster to view", names[0], names[1], "Back")
+                choice = gm.generic_input("Choose a monster to view:", names[0], names[1], "Back")
             elif len(names) == 3:
-                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], "Back")
+                choice = gm.generic_input("Choose a monster to view:", names[0], names[1], names[2], "Back")
             elif len(names) == 4:
-                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], names[3], "Back")
+                choice = gm.generic_input("Choose a monster to view:", names[0], names[1], names[2], names[3], "Back")
             elif len(names) == 5:
-                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], names[3], names[4], "Back")
+                choice = gm.generic_input("Choose a monster to view:", names[0], names[1], names[2], names[3], names[4], "Back")
             elif len(names) == 6:
-                choice = gm.generic_input("Choose a monster to view", names[0], names[1], names[2], names[3], names[4], names[5], "Back")
+                choice = gm.generic_input("Choose a monster to view:", names[0], names[1], names[2], names[3], names[4], names[5], "Back")
             if choice in range(len(names)):
                 print(self.team.get_member(choice))
             else:

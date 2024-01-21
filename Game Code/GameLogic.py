@@ -5,27 +5,136 @@ from PlayerClass import Player
 def exclusive_total():
     return genie_exclusive + forest_exclusive_1 + forest_exclusive_2 + town_exclusive + mountain_exclusive + fossil_exclusive + rugged_exclusive
 
-gym_level = 8
+gym_level = 7
 trainer_level = 4
 wild_level = 3
-genie_exclusive = rng.randint(0,1)
-forest_exclusive_1 = rng.randint(0,1)
-forest_exclusive_2 = rng.randint(0,1)
+badges = 0
+environment = 'Pasture'
+
+genie_exclusive = rng.randint(BLACK_EXCLUSIVE,WHITE_EXCLUSIVE)
+forest_exclusive_1 = rng.randint(BLACK_EXCLUSIVE,WHITE_EXCLUSIVE)
+forest_exclusive_2 = rng.randint(BLACK_EXCLUSIVE,WHITE_EXCLUSIVE)
 town_exclusive = rng.randint(0,1)
 mountain_exclusive = rng.randint(0,1)
 fossil_exclusive = rng.randint(0,1)
 rugged_exclusive = rng.randint(0,1)
 legendary_exclusive = None
 if exclusive_total() < 4:
-    legendary_exclusive = 0
+    legendary_exclusive = BLACK_EXCLUSIVE
 elif exclusive_total() > 4:
-    legendary_exclusive = 1
+    legendary_exclusive = WHITE_EXCLUSIVE
 else:
-    legendary_exclusive = rng.randint(0,1)
+    legendary_exclusive = rng.randint(BLACK_EXCLUSIVE,WHITE_EXCLUSIVE)
 
-def generate_wild_team(wild_streak = 0):
+def update_level_caps():
+    global gym_level
+    global trainer_level
+    global wild_level
+    if badges == 1:
+        gym_level = 10
+        trainer_level = 7
+        wild_level = 6
+    elif badges == 2:
+        gym_level = 15
+        trainer_level = 10
+        wild_level = 9
+    elif badges == 3:
+        gym_level = 20
+        trainer_level = 15
+        wild_level = 10
+    elif badges == 4:
+        gym_level = 25
+        trainer_level = 20
+        wild_level = 15
+    elif badges == 5:
+        gym_level = 30
+        trainer_level = 25
+        wild_level = 20
+    elif badges == 6:
+        gym_level = 35
+        trainer_level = 30
+        wild_level = 25
+    elif badges == 7:
+        gym_level = 40
+        trainer_level = 35
+        wild_level = 30
+    elif badges == 8:
+        gym_level = 45
+        trainer_level = 40
+        wild_level = 35
+
+def roll_current_environment():
+    if badges == 0:
+        return 'Pasture'
+    elif badges <= 2:
+        return rng.choice(COMMON_ENVIRONMENTS)
+    elif badges <= 4:
+        return rng.choice(UNCOMMON_ENVIRONMENTS)
+    elif badges <= 6:
+        return rng.choice(RARE_ENVIRONMENTS)
+    elif badges <= 8:
+        return rng.choice(RARE_ENVIRONMENTS + ELEMENTAL_ENVIRONMENTS)
+
+
+
+def generate_wild_team(wild_streak = 0, environment = 'Pasture'):
     team = Team("Wild")
-    team.add_member(Monster(PATRAT,wild_level))
+    if environment == 'Pasture':
+        roster = PASTURE_COMMON_1
+        if wild_streak > 0:
+            roster += PASTURE_UNCOMMON_1
+        if wild_streak > 1:
+            roster += PASTURE_RARE_1
+    elif environment == 'Forest':
+        roster = FOREST_COMMON_1
+        if wild_streak > 0:
+            roster += FOREST_UNCOMMON_1 + FOREST_EXCLUSIVES_1[forest_exclusive_1] + FOREST_EXCLUSIVES_2[forest_exclusive_2]
+        if wild_streak > 1:
+            roster += FOREST_RARE_1
+    elif environment == 'Town':
+        roster = TOWN_COMMON_1
+        if wild_streak > 0:
+            roster += TOWN_UNCOMMON_1 + TOWN_EXCLUSIVES[town_exclusive]
+        if wild_streak > 1:
+            roster += TOWN_RARE_1
+    elif environment == 'Desert':
+        roster = DESERT_COMMON_1
+        if wild_streak > 0:
+            roster += DESERT_UNCOMMON_1
+        if wild_streak > 1:
+            roster += DESERT_RARE_1
+    elif environment == 'Cave':
+        roster = CAVE_COMMON_1
+        if wild_streak > 0:
+            roster += CAVE_UNCOMMON_1 + FOSSIL_EXCLUSIVES[fossil_exclusive]
+        if wild_streak > 1:
+            roster += CAVE_RARE_1
+    elif environment == 'Charge Cave':
+        roster = CHARGE_CAVE_COMMON_1
+        if wild_streak > 0:
+            roster += CHARGE_CAVE_UNCOMMON_1
+        if wild_streak > 1:
+            roster += CHARGE_CAVE_RARE_1
+    elif environment == 'Mountain':
+        roster = MOUNTAIN_COMMON_1
+        if wild_streak > 0:
+            roster += MOUNTAIN_UNCOMMON_1 + MOUNTAIN_EXCLUSIVES[mountain_exclusive]
+        if wild_streak > 1:
+            roster += MOUNTAIN_RARE_1
+    elif environment == 'Ocean':
+        roster = OCEAN_COMMON_1
+        if wild_streak > 0:
+            roster += OCEAN_UNCOMMON_1 + FOSSIL_EXCLUSIVES[fossil_exclusive]
+        if wild_streak > 1:
+            roster += OCEAN_RARE_1
+    elif environment == 'Rugged':
+        roster = RUGGED_COMMON_1
+        if wild_streak > 0:
+            roster += RUGGED_EXCLUSIVES[rugged_exclusive]
+        if wild_streak > 1:
+            roster += RUGGED_RARE_1
+    pick = rng.choice(roster)
+    team.add_member(Monster(pick,wild_level))
     return team
 
 def generate_trainer_team():
@@ -33,10 +142,54 @@ def generate_trainer_team():
     team.add_member(Monster(LILLIPUP,trainer_level))
     return team
 
-def generate_gym_team():
+def generate_gym_team(badges = 0):
     team = Team("Gym Leader")
-    team.add_member(Monster(PATRAT,gym_level))
-    team.add_member(Monster(PURRLOIN,gym_level))
+    if badges == 0:
+        team.add_member(Monster(PATRAT,gym_level))
+        team.add_member(Monster(LILLIPUP,gym_level))
+    elif badges == 1:
+        team.add_member(Monster(PURRLOIN,gym_level))
+        team.add_member(Monster(PIDOVE,gym_level))
+    elif badges == 2:
+        team.add_member(Monster(PANSAGE,gym_level))
+        team.add_member(Monster(PANSEAR,gym_level))
+        team.add_member(Monster(PANPOUR,gym_level))
+    elif badges == 3:
+        team.add_member(Monster(SANDILE,gym_level))
+        team.add_member(Monster(DARUMAKA,gym_level))
+        team.add_member(Monster(MARACTUS,gym_level))
+    elif badges == 4:
+        team.add_member(Monster(EMOLGA,gym_level))
+        team.add_member(Monster(EXCADRILL,gym_level))
+        team.add_member(Monster(ALOMOMOLA,gym_level))
+        team.add_member(Monster(ARCHEN,gym_level))
+    elif badges == 5:
+        team.add_member(Monster(ZEBSTRIKA,gym_level))
+        team.add_member(Monster(COFAGRIGUS,gym_level))
+        team.add_member(Monster(GOTHORITA,gym_level))
+        team.add_member(Monster(GARBODOR,gym_level))
+    elif badges == 6:
+        team.add_member(Monster(JELLICENT,gym_level))
+        team.add_member(Monster(VANILLUXE,gym_level))
+        team.add_member(Monster(CRUSTLE,gym_level))
+        team.add_member(Monster(LEAVANNY,gym_level))
+        team.add_member(Monster(SCOLIPEDE,gym_level))
+    elif badges == 7:
+        team.add_member(Monster(EELEKTROSS,gym_level))
+        team.add_member(Monster(CHANDELURE,gym_level))
+        team.add_member(Monster(HAXORUS,gym_level))
+        team.add_member(Monster(BRAVIARY,gym_level))
+        team.add_member(Monster(COBALION,gym_level))
+    elif badges == 8:
+        if legendary_exclusive == BLACK_EXCLUSIVE:
+            team.add_member(Monster(ZEKROM,gym_level))
+        else:
+            team.add_member(Monster(RESHIRAM,gym_level))
+        team.add_member(Monster(MIENSHAO,gym_level))
+        team.add_member(Monster(BISHARP,gym_level))
+        team.add_member(Monster(BEARTIC,gym_level))
+        team.add_member(Monster(REUNICLUS,gym_level))
+        team.add_member(Monster(MANDIBUZZ,gym_level))
     return team
 
 def generate_map():
@@ -57,6 +210,8 @@ def explore_location():
 
 def wild_encounter(player: Player, wild_level: int, wild_streak: int):
     wild_team = generate_wild_team()
+    wild_pokemon_name = wild_team.get_active_member().name
+    print("Player encountered a wild \033[33m" + wild_pokemon_name + "\033[0m!")
     match_result = match(player.get_team(), wild_team, random_ai=True,wild_encounter=True)
     if match_result == 2: # Player caught the wild monster
         player.get_team().add_member(wild_team.pop_member(wild_team.active_member_index))
@@ -76,11 +231,10 @@ def trainer_encounter(player: Player, trainer_level: int):
         print("Player lost to the trainer")
         return 0
 
-def gym_encounter(player: Player, gym_level: int):
-    gym_team = generate_gym_team()
+def gym_encounter(player: Player, gym_level: int, gym_badges: int):
+    gym_team = generate_gym_team(gym_badges)
     match_result = match(player.get_team(), gym_team, random_ai=False)
     if match_result == 1: # Player defeated the gym leader
-        print("Player defeated the gym leader")
         player.level_up(3)
         return 1
     else: # Player lost to the gym leader
@@ -90,52 +244,66 @@ def gym_encounter(player: Player, gym_level: int):
 def campaign_game():
     # The real game
     player = Player()
-    travel_distance = 4
-    wild_streak = 0
-    while travel_distance > 0:
-        print("\nDistance to gym: " + str(travel_distance), end=" | ")
-        print("Current location: ", end=" ")
-        if wild_streak > 0:
-            print("Wild streak: " + str(wild_streak))
-        else:
-            print("")
-        response = gm.generic_input("Where will you head to?", "Fight", "Explore", "Town", "Pokemon", "Quit")
-        if response == 0:
-            print("Decided to fight a trainer")
-            fight_result = trainer_encounter(player, trainer_level)
-            if fight_result == 0:
-                print("Player lost")
+    global badges
+    global environment
+    while badges < 8:
+        travel_distance = 5
+        wild_streak = 0
+        while travel_distance > 0:
+            print("\nDistance to gym: " + str(travel_distance), end=" | ")
+            print("Current location: " + environment, end=" | ")
+            if wild_streak > 0:
+                print("Wild streak: " + str(wild_streak))
+            else:
+                print("")
+            response = gm.generic_input("Where will you head to?", "Fight", "Explore", "Town", "Pokemon", "Quit")
+            if response == 0:
+                print("Decided to fight a trainer")
+                wild_streak = 0
+                fight_result = trainer_encounter(player, trainer_level)
+                if fight_result == 0:
+                    print("Player lost")
+                    return
+                travel_distance -= 1
+            elif response == 1:
+                print("Decided to explore the area.")
+                travel_distance -= 1
+                explore_result = wild_encounter(player, wild_level, wild_streak)
+                if explore_result != 0:
+                    wild_streak += 1
+                if explore_result == 0:
+                    print("Player lost")
+                    return
+            elif response == 2:
+                print("Decided to head into town. \033[32mParty is fully healed.\033[0m")
+                TOWNSFOLK_TALK_ABOUT_LEGENDARY = 0
+                TOWNSFOLK_TALK_ABOUT_EXCLUSIVES = 1
+                TOWNSFOLK_TALK_ABOUT_GYM = 2
+                TOWNSFOLK_TALK_ABOUT_GOSSIP = 3
+                travel_distance -= 1   
+                wild_streak = 0
+                player.heal_team() 
+            elif response == 3:
+                print("Decided to check out your pokemon.")
+                player.view_team()
+            elif response == 4:
+                print("Decided to quit")
                 return
-            travel_distance -= 1
-        elif response == 1:
-            print("Decided to explore the area")
-            travel_distance -= 1
-            explore_result = wild_encounter(player, wild_level, wild_streak)
-            if explore_result != 0:
-                wild_streak += 1
-            if explore_result == 0:
-                print("Player lost")
-                return
-        elif response == 2:
-            print("Decided to head into town. \033[32mParty is fully healed.\033[0m")
-            TOWNSFOLK_TALK_ABOUT_LEGENDARY = 0
-            TOWNSFOLK_TALK_ABOUT_EXCLUSIVES = 1
-            TOWNSFOLK_TALK_ABOUT_GYM = 2
-            TOWNSFOLK_TALK_ABOUT_GOSSIP = 3
-            travel_distance -= 1   
-            wild_streak = 0
-            player.heal_team() 
-        elif response == 3:
-            print("Decided to check out your pokemon")
-            player.view_team()
-        elif response == 4:
-            print("Decided to quit")
+            else:
+                print("Error: Invalid response")
+        print("Player arrived at the gym. \033[32mYou healed your team before the battle.\033[0m")
+        player.heal_team()
+        gym_result = gym_encounter(player, gym_level, badges)
+        if gym_result == 0:
+            print("Player lost")
             return
-        else:
-            print("Error: Invalid response")
-    print("Player arrived at the gym. \033[32mYou healed your team before the battle.\033[0m")
-    player.heal_team()
-    gym_result = gym_encounter(player, gym_level)
+        elif gym_result == 1:
+            print("\33[33mPlayer obtained a badge!")
+            badges += 1
+            environment = roll_current_environment()
+            update_level_caps()
+            print("\033[32mParty is fully healed.\033[0m")
+            player.heal_team()
 
 def infinite_game():
     player_lost = False
@@ -185,7 +353,10 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
             else:
                 ai_choice = MonteCarloTreeSearch(current_game_state,random_policy=random_ai_policy).get_best_move()
             switch_after_fainting(ai_team, ai_choice - 4)
-        print("-----------------------------------------")   
+        if wild_encounter:
+            print("-- \033[32mWILD BATTLE\033[0m --------------------------")
+        else:
+            print("-- \033[33mTRAINER BATTLE\033[0m -----------------------")
         in_menu = True
         while in_menu:
             gm.battle_scene(player_team, ai_team)
@@ -202,18 +373,18 @@ def match(player_team: Team, ai_team: Team, random_ai = False,random_ai_policy=F
         if uinp == 11 and wild_encounter == True: # throw pokeball 
             print("Player used a pokeball on the wild " + ai_team.get_active_member().name + "!")
             base_catch_rate = (800 - ai_team.get_active_member().get_base_stat_total()) / 1000
-            print("Base catch rate: " + str(base_catch_rate))
+            #print("Base catch rate: " + str(base_catch_rate))
             hp_catch_rate = (1 -(ai_team.get_active_member().get_stat(HP) / ai_team.get_active_member().get_stat(MAX_HP))) * 0.4
-            print("HP catch rate: " + str(hp_catch_rate))
+            #print("HP catch rate: " + str(hp_catch_rate))
             attempt_amount_catch_rate = catch_attempts / 100
-            print("Attempt amount catch rate: " + str(attempt_amount_catch_rate))
+            #print("Attempt amount catch rate: " + str(attempt_amount_catch_rate))
             total_catch_rate = base_catch_rate + hp_catch_rate + attempt_amount_catch_rate
             if total_catch_rate > 1:
                 total_catch_rate = 1
-            print("Total catch rate: " + str(total_catch_rate))
+            #print("Total catch rate: " + str(total_catch_rate))
             catch_roll = rng.randint(0,100)
             if catch_roll < total_catch_rate * 100:
-                print("Player caught the wild " + ai_team.get_active_member().name + "!")
+                print("\33[32mPlayer caught the wild " + ai_team.get_active_member().name + "!\033[0m")
                 print("-----------------------------------------")  
                 return 2
             else:
@@ -445,7 +616,3 @@ def final_batle(random_ai = False):
     ai_team.add_member(Monster(VIRIZION, 70))
     ai_team.add_member(Monster(ZEKROM, 70))
     match_result = match(player_team, ai_team, random_ai=random_ai)
-
-
-
-campaign_game()

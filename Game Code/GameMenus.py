@@ -21,15 +21,17 @@ def using_calculator_menus():
 def title_screen():
     if using_calculator_menus():
         print("Welcome to Pokemini!")
+        print("Expand your terminal size for a better experience. PLEASE READ THE DOCUMENTATION BEFORE PLAYING!")
         generic_input()
     else:
-        uinp = generic_input("Welcome to Pokemini!")
+        print("Expand your terminal size for a better experience. \33[31mPLEASE READ THE DOCUMENTATION BEFORE PLAYING!\33[0m\n")
+        uinp = generic_input("Welcome to Pokemini!", "start", "documentation", "quit")
         if uinp == 0:
-            print("Player requested to continue")
             return 0
         elif uinp == 1:
-            print("Ending game")
             return 1
+        elif uinp == 2:
+            return 2
 
 def generic_continue():
     if using_calculator_menus():
@@ -185,14 +187,15 @@ def battle_menu_input(active_member_moves, team_members, valid_switch_indices = 
         return uinp
 
 def battle_scene(player_team, ai_team):
-    print("You: ", end="")
+    print(player_team.name + ": ", end="")
     print("Lv." + str(player_team.get_member(player_team.active_member_index).level) + " ", end="")
     print(player_team.get_member(player_team.active_member_index).name, end="")
     print(" " + player_team.get_member(player_team.active_member_index).get_status_string() if player_team.get_member(player_team.active_member_index).get_status_string() else "", end="")
     player_percent_health = round((player_team.get_member(player_team.active_member_index).get_stat(HP) / player_team.get_active_member().get_stat(MAX_HP)) * 100, 1)
     if player_percent_health > 50:
-        print(" HP: " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")
-        print(" (" + str(player_percent_health) + " %)", end="")
+        # Color text green
+        print("\33[32m HP: " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")
+        print(" (" + str(player_percent_health) + " %)", end="\033[0m")
     elif player_percent_health > 25:
         # Color text yellow
         print("\33[33m HP: " + str(player_team.get_member(player_team.active_member_index).get_stat(HP)) + "/" + str(player_team.get_active_member().get_stat(MAX_HP)), end="")
@@ -205,25 +208,30 @@ def battle_scene(player_team, ai_team):
     number_of_enemy_pokemon = ai_team.get_number_of_members_to_switch_to() + 1
     if number_of_pokemon > number_of_enemy_pokemon:
         # Text color green
-        print("\33[32m |" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "| ", end="\033[0m")
+        print(" |\33[32m" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "\033[0m| ", end="")
     elif number_of_pokemon < number_of_enemy_pokemon:
         # Text color red
-        print("\33[31m |" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "| ", end="\033[0m")
+        print(" |\33[31m" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "\033[0m| ", end="")
     else:
         # Text color white (default)
         print(" |" + str(number_of_pokemon) + "v" + str(number_of_enemy_pokemon) + "| ", end="")
-    print("Opponent: ", end="")
+    print(ai_team.name + ": ", end="")
     print("Lv." + str(ai_team.get_member(ai_team.active_member_index).level) + " ", end="")
     print(ai_team.get_member(ai_team.active_member_index).name, end="")
     print(" " + ai_team.get_member(ai_team.active_member_index).get_status_string() if ai_team.get_member(ai_team.active_member_index).get_status_string() else "", end="")
     ai_hp_percentage = round((ai_team.get_member(ai_team.active_member_index).get_stat(HP) / ai_team.get_active_member().get_stat(MAX_HP)) * 100, 1)
-    print(" HP: " + str(ai_hp_percentage),"%")
+    if ai_hp_percentage > 50:
+        print("\33[32m HP: " + str(ai_hp_percentage),"%\033[0m")
+    elif ai_hp_percentage > 25:
+        print("\33[33m HP: " + str(ai_hp_percentage),"%\033[0m")
+    else:
+        print("\33[31m HP: " + str(ai_hp_percentage),"%\033[0m")
 
 def starter_menu(name1, name2, name3):
     if using_calculator_menus():
         return input()
     else: # Case where not on calculator, or force_game_in_terminal is True
-        starter_choice = generic_input("Choose your starter.", "Snivy", "Tepig", "Oshawott")
+        starter_choice = generic_input("Choose your starter.", name1, name2, name3)
         return starter_choice
 
 

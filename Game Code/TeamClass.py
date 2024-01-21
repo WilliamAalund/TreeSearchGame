@@ -53,6 +53,12 @@ class Team:
         for monster in self.team_members:
             names.append(monster.name)
         return names
+    
+    def get_member_names_and_hp(self):
+        names = []
+        for monster in self.team_members:
+            names.append(monster.name + " " + str(monster.HP) + "/" + str(monster.max_HP))
+        return names
 
     def get_active_member(self):
         return self.team_members[self.active_member_index]
@@ -139,7 +145,8 @@ class Team:
     def level_up(self, level):
         self.team_level += level
         for monster in self.team_members:
-            monster.level_up(level)
+            if not monster.fainted:
+                monster.level_up(level)
 
     def deep_copy(self):
         new_team = Team()

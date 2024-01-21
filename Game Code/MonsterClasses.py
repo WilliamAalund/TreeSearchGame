@@ -735,11 +735,11 @@ class Monster: #TODO: set up move database for each monster
         # level up if experience is enough
         pass
 
-    def level_up(self, increment_level_amount = 1): # Levels up the monster by 1
+    def level_up(self, increment_level_amount = 1, visualization = True): # Levels up the monster by 1
         level_increase = increment_level_amount
         if self.level + level_increase > 100:
             level_increase = 100 - self.level
-        if self.level + level_increase <= 100:
+        if self.level + level_increase <= 100 and level_increase > 0:
             old_max_hp = self.max_HP
             old_attack = self.attack
             old_defense = self.defense
@@ -748,21 +748,22 @@ class Monster: #TODO: set up move database for each monster
             old_speed = self.speed
             self.level += level_increase
             self.calculate_stats() 
-            print(f"{self.name} leveled up to level {self.level}!")
-            print(f"HP: {old_max_hp} -> {self.max_HP}")
-            print(f"Attack: {old_attack} -> {self.attack}")
-            print(f"Defense: {old_defense} -> {self.defense}")
-            print(f"Special Attack: {old_special_attack} -> {self.special_attack}")
-            print(f"Special Defense: {old_special_defense} -> {self.special_defense}")
-            print(f"Speed: {old_speed} -> {self.speed}") 
-            print()
+            if visualization:
+                print(f"\33[36m{self.name} leveled up to level {self.level}!\33[0m", end=' ( ')
+                print(f"HP: {old_max_hp} -> {self.max_HP}", end=' | ')
+                print(f"Attack: {old_attack} -> {self.attack}", end=' | ')
+                print(f"Defense: {old_defense} -> {self.defense}", end=' | ')
+                print(f"Special Attack: {old_special_attack} -> {self.special_attack}", end=' | ')
+                print(f"Special Defense: {old_special_defense} -> {self.special_defense}", end=' | ')
+                print(f"Speed: {old_speed} -> {self.speed}", end=' )')
+                print()
             hp_difference = self.max_HP - old_max_hp
             self.HP += hp_difference
             if self.fainted:
                 self.fainted = False
                 self.not_fainted = True
             if self.level_condition_met_to_evolve():
-                self.evolve()
+                self.evolve(visualization=visualization)
             # Reset exp to 0
             # Calculate exp to next level, assign it to a parameter
 
@@ -773,7 +774,7 @@ class Monster: #TODO: set up move database for each monster
         else:
             return False
 
-    def evolve(self):
+    def evolve(self, visualization = True):
         if self.evolve_id:
             new_mon_id = self.evolve_id
         else:
@@ -832,8 +833,16 @@ class Monster: #TODO: set up move database for each monster
             if self.number_of_moves == 0:
                 self.add_move(1)
                 print("No moves found, learned Tackle")
-            print(f"{old_name} evolved into {self.name}!", end=' ')
-            print(self)
+            if visualization:
+                print(f"\33[35m{old_name} evolved into {self.name}!", end='\33[0m ')
+                print("( HP: " + str(self.max_HP), end=' | ')
+                print("Attack: " + str(self.attack), end=' | ')
+                print("Defense: " + str(self.defense), end=' | ')
+                print("Special Attack: " + str(self.special_attack), end=' | ')
+                print("Special Defense: " + str(self.special_defense), end=' | ')
+                print("Speed: " + str(self.speed), end=' | ')
+                print("+ New moves learned )")
+                #print(self)
         else:
             print("No evolution data found")       
 
@@ -856,20 +865,12 @@ class Monster: #TODO: set up move database for each monster
         new_monster = Monster(deep_copy=self)
         return new_monster
 
-def generated_monster(id = 0, level_parameter = 1): #TODO: Implement monster generation
-    if id == -1:
-        monster_id = rng.randint(UNOVA_LOWER_BOUND,UNOVA_UPPER_BOUND)
-    else:
-        monster_id = id
-    if level_parameter > 0 and level_parameter < 101:
-        level = level_parameter
-    else:
-        print("Invalid level parameter, setting to 1")
-        level = 1
-    monster = Monster(monster_id, level)
-    # Create a randomly generated monster
-    # Return the monster
-    return monster
+def generated_monster(number_id, level):
+    new_monster = Monster(number_id, 1)
+    levels_to_add = level - 1
+    while levels_to_add > 0:
+        new_monster.level_up(visualization=False)
+        levels_to_add -= 1
 
 VICTINI = 494
 SNIVY = 495
@@ -1036,6 +1037,13 @@ MYTHICAL_3 = [TORNADUS,THUNDURUS,LANDORUS]
 LEGENDARIES = [RESHIRAM, ZEKROM, KYUREM]
 
 # When generating roster, flip coin for each pair. Tally up number of heads and tails. if heads > tails, region legendary is RESHIRAM, else ZEKROM
+STARTER_ENVIRONMENT = ['Pasture']
+COMMON_ENVIRONMENTS = ['Pasture', 'Forest', 'Urban']
+UNCOMMON_ENVIRONMENTS = ['Desert', 'Cave', 'Ocean']
+RARE_ENVIRONMENTS = ['Mountain', 'Charge Cave', 'Ruins', 'Rugged']
+ELEMENTAL_ENVIRONMENTS = ['Wet', 'Heat', 'Lush', 'Energised']
+ENVIRONMENTS = ['Pasture', 'Forest', 'Town', 'Desert', 'Cave', 'Charge Cave', 'Mountain', 'Ocean', 'Ruins', 'Rugged']
+
 MYTHICAL_EXCLUSIVES = [TORNADUS,THUNDURUS]
 FOREST_EXCLUSIVES_1 = [SAWK,THROH]
 FOREST_EXCLUSIVES_2 = [PETILIL,COTTONEE]
@@ -1055,45 +1063,47 @@ FOREST_COMMON_1 = [PANSAGE, SEWADDLE, TYMPOLE, BLITZLE]
 FOREST_UNCOMMON_1 = [WOOBAT, VENIPEDE, TIMBURR]
 FOREST_RARE_1 = [AUDINO,FOONGUS]
 
-FOREST_COMMON_2 = [DEERLING, KARRABLAST, SHELMET]
-
-CITY_COMMON_1 = [PIDOVE, TRUBBISH, MINCCINO]
-
-TOWN_COMMON_1 = [TRUBBISH,VANILLITE,DUCKLETT]
-TOWN_UNCOMMON_1 = [EMOLGA]
+TOWN_COMMON_1 = [TRUBBISH,VANILLITE,DUCKLETT,PIDOVE]
+TOWN_UNCOMMON_1 = [EMOLGA, MINCCINO]
 TOWN_RARE_1 = [ZORUA]
 
 DESERT_COMMON_1 = [SCRAGGY, DWEBBLE, SANDILE]
 DESERT_UNCOMMON_1 = [MARACTUS, DARUMAKA]
 DESERT_RARE_1 = [SIGILYPH, YAMASK]
 
-CAVE_COMMON_1 = [ROGGENROLA, WOOBAT, TIMBURR, TYMPOLE]
-CAVE_UNCOMMON_1 = [DRILBUR]
-CAVE_RARE_1 = [AXEW, DEINO]
+CAVE_COMMON_1 = [ROGGENROLA, TIMBURR, TYMPOLE]
+CAVE_UNCOMMON_1 = [WOOBAT]
+CAVE_RARE_1 = [DRILBUR]
 
-CHARGE_CAVE_COMMON_1 = [JOLTIK, TYNAMO, KLINK]
-CHARGE_CAVE_UNCOMMON_1 = [FERROSEED]
+CHARGE_CAVE_COMMON_1 = [JOLTIK, KLINK, ROGGENROLA]
+CHARGE_CAVE_UNCOMMON_1 = [FERROSEED, TYNAMO]
+CHARGE_CAVE_RARE_1 = [DRILBUR]
 
-MOUNTAIN_COMMON_1 = [CRYOGONAL,CUBCHOO]
-MOUNTAIN_UNCOMMON_1 = [DEINO, MIENFOO]
+MOUNTAIN_COMMON_1 = [CUBCHOO, ROGGENROLA, WOOBAT, DEERLING]
+MOUNTAIN_UNCOMMON_1 = [MIENFOO, CRYOGONAL, KARRABLAST, SHELMET]
+MOUNTAIN_RARE_1 = [DRILBUR, AXEW]
 
 OCEAN_COMMON_1 = [BASCULIN]
 OCEAN_UNCOMMON_1 = [FRILLISH]
 OCEAN_RARE_1 = [ALOMOMOLA]
 
-RUINS_COMMON_1 = [LITWICK, ELGYEM]
-RUINS_UNCOMMON_1 = [YAMASK,DRUDDIGON,GOLETT]
-RUINS_RARE_1 = [LARVESTA]
+RUINS_COMMON_1 = [LITWICK, ELGYEM, WOOBAT]
+RUINS_UNCOMMON_1 = [YAMASK,GOLETT]
+RUINS_RARE_1 = [DRUDDIGON,LARVESTA]
 
 RUGGED_COMMON_1 = [PAWNIARD, BOUFFALANT]
+RUGGED_UNCOMMON_1 = [DWEBBLE, SCRAFTY, VENIPEDE]
+RUGGED_RARE_1 = [DRILBUR, DEINO]
 
 HEAT = [TEPIG,DARUMAKA,HEATMOR,LARVESTA,MARACTUS,ROGGENROLA,PANSEAR,SANDILE,DWEBBLE]
 WET = [OSHAWOTT,DUCKLETT,FRILLISH,STUNFISK,TYMPOLE,TIRTOUGA,ALOMOMOLA,PANPOUR,BASCULIN]
 LUSH = [SNIVY,DEERLING,SEWADDLE,PETILIL,COTTONEE,PANSAGE,MARACTUS,FOONGUS,FERROSEED]
 ENERGISED = [BLITZLE,EMOLGA,JOLTIK,KLINK,TYNAMO,DRILBUR,AXEW,MIENFOO,SAWK,THROH]
 
+BLACK_EXCLUSIVE = 0
+WHITE_EXCLUSIVE = 1
+
 if __name__ == "__main__":
-    TestMonster = Monster(SNIVY, 50)
+    TestMonster = Monster(DEWOTT, 35)
     print(TestMonster)
-    TestMonster.level_up()
     TestMonster.level_up()

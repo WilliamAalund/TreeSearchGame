@@ -1,16 +1,17 @@
-from MonteCarlo import MonteCarloTreeSearch
-from GameMenus import *
-from MatchClasses import *   
+import GameMenus as gm
+import GameLogic as gl
 
 def main():
-    print("Program start")
-    if not force_game_in_terminal:
-        get_platform()
-    uinp = title_screen()
+    if not gm.force_game_in_terminal:
+        gm.get_platform()
+    uinp = gm.title_screen()
     if uinp == 1:
+        print("Starting tutorial")
+    if uinp == 2:
         return
     elif uinp == 0:
-        print("Starting game")
+        print("Starting game. Good luck!")
+        gl.campaign_game()
         
 
 main() # Run the game
