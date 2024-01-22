@@ -1,3 +1,5 @@
+import math
+
 MAX_TEAM_SIZE = 6
 
 class Team:
@@ -17,6 +19,16 @@ class Team:
         return result
         team_members_names = [str(member.name) for member in self.team_members]
         return f"Team: {self.name} | Team size: {self.team_size} | Team level: {self.team_level} | Team members: {', '.join(team_members_names)}"
+
+    def calculate_team_level(self):
+        team_level = 1
+        collective_monster_level = 0
+        if self.team_size > 0:
+            for monster in self.team_members:
+                collective_monster_level += monster.level
+            team_level = collective_monster_level / self.team_size
+        self.team_level = math.floor(team_level)
+
 
     def add_member(self, monster):
         if self.team_size <= MAX_TEAM_SIZE:
@@ -143,10 +155,13 @@ class Team:
             monster.fully_heal()
 
     def level_up(self, level):
-        self.team_level += level
         for monster in self.team_members:
             if not monster.fainted:
-                monster.level_up(level)
+                if monster.level < self.team_level:
+                    monster.level_up(level * 2)
+                else:
+                    monster.level_up(level)
+        self.calculate_team_level()
 
     def deep_copy(self):
         new_team = Team()

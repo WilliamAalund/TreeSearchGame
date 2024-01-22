@@ -7,6 +7,8 @@ class Player:
     def __init__(self):
         self.name = "Player"
         self.trainer_level = 13
+        self.experience = 0
+        self.experience_needed_to_level_up = 4
         self.team: Team = Team(self.name, 5)
         self.bag = Bag()
         self.pick_starter()
@@ -38,10 +40,21 @@ class Player:
     def level_up(self, level):
         self.team.level_up(level)
 
+    def add_experience(self, experience):
+        self.experience += experience
+        if self.experience >= self.experience_needed_to_level_up:
+            self.experience -= self.experience_needed_to_level_up
+            if self.experience < 0:
+                self.experience = 0
+            self.level_up(1)
+
     def view_team(self):
         in_menu = True
         names = self.team.get_member_names_and_hp()
         while in_menu:
+            print()
+            message = "Party level: " + str(self.team.team_level) + " experience to party level up: " + str(self.experience_needed_to_level_up - self.experience)
+            print(message)
             if len(names) == 0:
                 print("No team members")
                 in_menu = False
