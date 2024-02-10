@@ -56,6 +56,8 @@ EVOLVE_VIA_SHINY_STONE = 'SH'
 EVOLVE_VIS_DUSTY_BOWL = 'DB'
 EVOLVE_VIA_FRIENDSHIP = 'FR'
 
+MONSTER_DATA_DIRECTORY = 'monsterdata.csv'
+
 UNIQUE_EVOLUTION_METHODS = [EVOLVE_VIA_TRADE, EVOLVE_VIA_LEAF_STONE, EVOLVE_VIA_FIRE_STONE, EVOLVE_VIA_WATER_STONE, EVOLVE_VIA_THUNDER_STONE, EVOLVE_VIA_MOON_STONE, EVOLVE_VIA_DUSK_STONE, EVOLVE_VIA_SUN_STONE, EVOLVE_VIA_ICE_STONE, EVOLVE_VIA_SHINY_STONE, EVOLVE_VIS_DUSTY_BOWL, EVOLVE_VIA_FRIENDSHIP]
 
 
@@ -212,7 +214,7 @@ class Monster: #TODO: set up move database for each monster
             self.evolve_id = None
 
             monster_data = None  # Variable to store the matched row
-            with open('monsters.csv', 'r') as file:
+            with open("monsterdata.csv", 'r') as file:
                 reader = csv.reader(file)
                 for row in reader:
                     if row[0] == str(number_id) and row[1] == str(code):
@@ -283,7 +285,7 @@ class Monster: #TODO: set up move database for each monster
             stats += f"\n{self.move_4}"
         else:
             stats += "\n --- "
-        return f"\n{self.name} | Lv.{self.level} | HP: {self.HP}/{self.max_HP} | {self.type_1} {self.type_2 + ' ' if self.type_2 else ''}| {self.nature} | {('Evolution: ' + self.get_evolution_method()) if self.get_evolution_method() else ''}\n{stats}\n"
+        return f"\n{self.name} | Lv.{self.level} | HP: {self.HP}/{self.max_HP} {(self.get_status_string() + ' ') if self.get_status_string() else ''}| {self.type_1} {self.type_2 + ' ' if self.type_2 else ''}| {self.nature} | {('Evolution: ' + self.get_evolution_method()) if self.get_evolution_method() else ''}\n{stats}\n"
     
     def get_base_stat_total(self):
         return self.base_hp + self.base_attack + self.base_defense + self.base_special_attack + self.base_special_defense + self.base_speed
@@ -780,7 +782,7 @@ class Monster: #TODO: set up move database for each monster
         else:
             new_mon_id = str(int(self.id) + 1)
         monster_data = None  # Variable to store the matched row
-        with open('monsters.csv', 'r') as file:
+        with open(MONSTER_DATA_DIRECTORY, 'r') as file:
             reader = csv.reader(file)
             for row in reader:
                 if row[0] == str(new_mon_id) and row[1] == str(self.code):
@@ -1115,3 +1117,5 @@ if __name__ == "__main__":
     TestMonster = Monster(DEWOTT, 35)
     print(TestMonster)
     TestMonster.level_up()
+    TestMonster.set_poison()
+    print(TestMonster)

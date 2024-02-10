@@ -20,6 +20,12 @@ class Team:
         team_members_names = [str(member.name) for member in self.team_members]
         return f"Team: {self.name} | Team size: {self.team_size} | Team level: {self.team_level} | Team members: {', '.join(team_members_names)}"
 
+    def small_str(self):
+        result = ''
+        for monster in self.team_members:
+            result += monster.name + '\n'
+        return result
+
     def calculate_team_level(self):
         team_level = 1
         collective_monster_level = 0

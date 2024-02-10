@@ -53,7 +53,7 @@ class Player:
         names = self.team.get_member_names_and_hp()
         while in_menu:
             print()
-            message = "Party level: " + str(self.team.team_level) + " experience to party level up: " + str(self.experience_needed_to_level_up - self.experience)
+            message = "Party level: " + str(self.team.team_level) + " | Experience to party level up: " + str(self.experience_needed_to_level_up - self.experience)
             print(message)
             if len(names) == 0:
                 print("No team members")
