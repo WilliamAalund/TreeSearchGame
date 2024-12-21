@@ -1,4 +1,5 @@
 # TreeSearchGame
+(To play the game, run the Main.py file.)
 
 ## This game is a recreation of Pokemon played entirely within the terminal, and powered completely by Python. 
 
